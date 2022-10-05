@@ -1,3 +1,4 @@
+using Amazon.DynamoDBv2;
 using AspNetCore.Identity.AmazonDynamoDB;
 using Microsoft.AspNetCore.CookiePolicy;
 using Microsoft.AspNetCore.Identity;
@@ -21,6 +22,15 @@ public class Startup
 
     public void ConfigureServices(IServiceCollection services)
     {
+        var dynamoDbConfig = Configuration.GetSection("DynamoDB");
+
+        services
+            .AddDefaultAWSOptions(Configuration.GetAWSOptions())
+            .AddSingleton<IAmazonDynamoDB>(_ => new AmazonDynamoDBClient(new AmazonDynamoDBConfig
+            {
+                ServiceURL = dynamoDbConfig.GetValue<string>("ServiceUrl"),
+            }));
+
         services
             .AddIdentity<DynamoDbUser, DynamoDbRole>(options =>
             {
@@ -109,13 +119,14 @@ public class Startup
             IdentityModelEventSource.ShowPII = true; 
         }
 
-        services
-            .AddHealthChecks();
+        services.AddAuthorization();
+        services.AddControllers();
+        services.AddHealthChecks();
     }
 
     public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
     {
-        DynamoDbSetup.EnsureInitialized(app.ApplicationServices);
+        AspNetCoreIdentityDynamoDbSetup.EnsureInitialized(app.ApplicationServices);
         OpenIddictDynamoDbSetup.EnsureInitialized(app.ApplicationServices);
 
         app.UseForwardedHeaders();
