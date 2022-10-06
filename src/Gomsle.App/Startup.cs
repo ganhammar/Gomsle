@@ -1,5 +1,6 @@
 using Amazon.DynamoDBv2;
 using AspNetCore.Identity.AmazonDynamoDB;
+using Gomsle.App.Features.Email;
 using Microsoft.AspNetCore.CookiePolicy;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Logging;
@@ -7,7 +8,7 @@ using OpenIddict.Abstractions;
 using OpenIddict.AmazonDynamoDB;
 using static OpenIddict.Abstractions.OpenIddictConstants;
 
-namespace Gomsle;
+namespace Gomsle.App;
 
 public class Startup
 {
@@ -22,6 +23,10 @@ public class Startup
 
     public void ConfigureServices(IServiceCollection services)
     {
+        EmailSenderOptions emailSenderOptions = new();
+        Configuration.GetSection(nameof(EmailSenderOptions)).Bind(emailSenderOptions);
+        services.AddSingleton<EmailSenderOptions>(emailSenderOptions);
+
         var dynamoDbConfig = Configuration.GetSection("DynamoDB");
 
         services
@@ -42,6 +47,7 @@ public class Startup
                 options.Password.RequiredLength = 6;
                 options.User.RequireUniqueEmail = true;
             })
+            .AddDefaultTokenProviders()
             .AddDynamoDbStores();
 
         services
@@ -119,8 +125,12 @@ public class Startup
             IdentityModelEventSource.ShowPII = true; 
         }
 
+        services.AddSingleton<IEmailSender, EmailSender>();
+
         services.AddAuthorization();
-        services.AddControllers();
+        services
+            .AddControllersWithViews()
+            .AddFeatureFolders();
         services.AddHealthChecks();
     }
 

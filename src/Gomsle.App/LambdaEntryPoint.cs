@@ -1,6 +1,6 @@
 using Amazon.Lambda.AspNetCoreServer;
 
-namespace Gomsle;
+namespace Gomsle.App;
 
 public class LambdaEntryPoint : APIGatewayProxyFunction
 {
