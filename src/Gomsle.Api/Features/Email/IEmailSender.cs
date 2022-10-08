@@ -1,4 +1,4 @@
-namespace Gomsle.App.Features.Email;
+namespace Gomsle.Api.Features.Email;
 
 public interface IEmailSender
 {

@@ -1,4 +1,4 @@
-namespace Gomsle.App;
+namespace Gomsle.Api;
 
 public class LocalEntryPoint
 {

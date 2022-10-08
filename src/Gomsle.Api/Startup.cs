@@ -1,6 +1,7 @@
 using Amazon.DynamoDBv2;
 using AspNetCore.Identity.AmazonDynamoDB;
-using Gomsle.App.Features.Email;
+using Gomsle.Api.Features.Email;
+using Gomsle.Api.Infrastructure;
 using Microsoft.AspNetCore.CookiePolicy;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Logging;
@@ -8,7 +9,7 @@ using OpenIddict.Abstractions;
 using OpenIddict.AmazonDynamoDB;
 using static OpenIddict.Abstractions.OpenIddictConstants;
 
-namespace Gomsle.App;
+namespace Gomsle.Api;
 
 public class Startup
 {
@@ -36,28 +37,7 @@ public class Startup
                 ServiceURL = dynamoDbConfig.GetValue<string>("ServiceUrl"),
             }));
 
-        services
-            .AddIdentity<DynamoDbUser, DynamoDbRole>(options =>
-            {
-                options.Password.RequireDigit = false;
-                options.Password.RequireLowercase = false;
-                options.Password.RequireNonAlphanumeric = false;
-                options.Password.RequireUppercase = false;
-                options.Password.RequiredUniqueChars = 3;
-                options.Password.RequiredLength = 6;
-                options.User.RequireUniqueEmail = true;
-            })
-            .AddDefaultTokenProviders()
-            .AddDynamoDbStores();
-
-        services
-            .Configure<IdentityOptions>(options =>
-            {
-                options.ClaimsIdentity.UserNameClaimType = OpenIddictConstants.Claims.Name;
-                options.ClaimsIdentity.UserIdClaimType = OpenIddictConstants.Claims.Subject;
-                options.ClaimsIdentity.RoleClaimType = OpenIddictConstants.Claims.Role;
-                options.ClaimsIdentity.EmailClaimType = OpenIddictConstants.Claims.Email;
-            });
+        services.AddIdentity();
 
         services
             .AddOpenIddict()
@@ -129,7 +109,7 @@ public class Startup
 
         services.AddAuthorization();
         services
-            .AddControllersWithViews()
+            .AddControllers()
             .AddFeatureFolders();
         services.AddHealthChecks();
     }

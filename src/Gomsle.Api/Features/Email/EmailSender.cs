@@ -2,7 +2,7 @@ using System.Net;
 using SendGrid;
 using SendGrid.Helpers.Mail;
 
-namespace Gomsle.App.Features.Email;
+namespace Gomsle.Api.Features.Email;
 
 public class EmailSender : IEmailSender
 {

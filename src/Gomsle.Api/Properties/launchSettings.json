@@ -1,6 +1,6 @@
 ﻿{
   "profiles": {
-    "Gomsle.App": {
+    "Gomsle.Api": {
       "commandName": "Project",
       "dotnetRunMessages": true,
       "launchBrowser": true,

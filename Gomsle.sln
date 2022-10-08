@@ -5,7 +5,11 @@ VisualStudioVersion = 16.0.30114.105
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{3EA54FE8-6A04-4AE4-9807-6D0EA070CB94}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Gomsle.App", "src\Gomsle.App\Gomsle.App.csproj", "{DA8262DD-93BE-45E0-9E42-42343D6D6577}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Gomsle.Api", "src\Gomsle.Api\Gomsle.Api.csproj", "{DA8262DD-93BE-45E0-9E42-42343D6D6577}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{262658C3-38BC-45F2-80EF-808298942800}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Gomsle.Api.Tests", "test\Gomsle.Api.Tests\Gomsle.Api.Tests.csproj", "{8E8D5038-5AFF-4126-92FB-F6149C9647A8}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -20,8 +24,13 @@ Global
 		{DA8262DD-93BE-45E0-9E42-42343D6D6577}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DA8262DD-93BE-45E0-9E42-42343D6D6577}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DA8262DD-93BE-45E0-9E42-42343D6D6577}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8E8D5038-5AFF-4126-92FB-F6149C9647A8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8E8D5038-5AFF-4126-92FB-F6149C9647A8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8E8D5038-5AFF-4126-92FB-F6149C9647A8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8E8D5038-5AFF-4126-92FB-F6149C9647A8}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{DA8262DD-93BE-45E0-9E42-42343D6D6577} = {3EA54FE8-6A04-4AE4-9807-6D0EA070CB94}
+		{8E8D5038-5AFF-4126-92FB-F6149C9647A8} = {262658C3-38BC-45F2-80EF-808298942800}
 	EndGlobalSection
 EndGlobal
