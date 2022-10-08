@@ -41,7 +41,7 @@ public static class ServiceCollectionExtensions
         services.AddMediatR(Assembly.GetAssembly(typeof(Startup))!);
 
         services.Scan(x => x
-            .FromAssembliesOf(typeof(IResponse))
+            .FromAssemblyOf<IResponse>()
                 .AddClasses(classes => classes.AssignableTo(typeof(IRequestHandler<,>)))
                     .AsImplementedInterfaces()
                     .WithTransientLifetime()

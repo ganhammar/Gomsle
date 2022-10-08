@@ -2,6 +2,7 @@ using Amazon.DynamoDBv2;
 using AspNetCore.Identity.AmazonDynamoDB;
 using Gomsle.Api.Features.Email;
 using Gomsle.Api.Infrastructure;
+using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
@@ -26,7 +27,7 @@ public abstract class TestBase
             .FirstOrDefault() as Mock<T>;
     }
 
-    protected IServiceProvider GetServiceProvider(Action<IServiceCollection> configure)
+    protected IServiceProvider GetServiceProvider(Action<IServiceCollection>? configure = default)
     {
         var emailMock = new Mock<IEmailSender>();
         Mocks.Add(emailMock);
@@ -55,9 +56,37 @@ public abstract class TestBase
         serviceCollection.AddIdentity();
         serviceCollection.AddMediatR();
 
-        configure(serviceCollection);
+        if (configure != default)
+        {
+            configure(serviceCollection);
+        }
 
         return serviceCollection.BuildServiceProvider();
+    }
+
+    protected async Task MediatorTest<T>(IRequest<T> message, Action<T> assert)
+    {
+        using (var database = DynamoDbLocalServerUtils.CreateDatabase())
+        {
+            var serviceProvider = GetServiceProvider(services =>
+                services.AddSingleton<IAmazonDynamoDB>(database.Client));
+
+            AspNetCoreIdentityDynamoDbSetup.EnsureInitialized(serviceProvider);
+            OpenIddictDynamoDbSetup.EnsureInitialized(serviceProvider);
+
+            var mediator = serviceProvider.GetRequiredService<IMediator>();
+            
+            try
+            {
+                var response = await mediator.Send(message);
+                assert(response);
+            }
+            catch(Exception)
+            {
+                database.Dispose();
+                throw;
+            }
+        }
     }
 
     protected async Task ControllerTest<T>(Func<IServiceProvider, object[]> getParams, Func<T, IServiceProvider, Task> actAndAssert)
