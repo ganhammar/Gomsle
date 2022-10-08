@@ -2,7 +2,6 @@ using Amazon.DynamoDBv2;
 using AspNetCore.Identity.AmazonDynamoDB;
 using Gomsle.Api.Features.Email;
 using Gomsle.Api.Infrastructure;
-using Gomsle.Api.Tests.Features.Email;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
@@ -13,23 +12,55 @@ namespace Gomsle.Api.Tests.Infrastructure;
 
 public abstract class TestBase
 {
-    public IServiceProvider GetServiceProvider(Action<IServiceCollection> configure)
+    private List<Mock> Mocks { get; set; } = new List<Mock>();
+
+    protected Mock<T>? GetMock<T>()
+        where T : class
     {
+        return Mocks
+            .Where(x => x.GetType().IsGenericType)
+            .Where(x => x.GetType()
+                .GetGenericArguments()
+                .First()
+                .IsAssignableFrom(typeof(T)))
+            .FirstOrDefault() as Mock<T>;
+    }
+
+    protected IServiceProvider GetServiceProvider(Action<IServiceCollection> configure)
+    {
+        var emailMock = new Mock<IEmailSender>();
+        Mocks.Add(emailMock);
+
+        var request = new Mock<HttpRequest>();
+        request.Setup(x => x.Scheme).Returns("http");
+        request.Setup(x => x.Host).Returns(HostString.FromUriComponent("http://gomsle.com"));
+        request.Setup(x => x.PathBase).Returns(PathString.FromUriComponent("/api"));
+
+        var httpContext = new Mock<HttpContext>();
+        httpContext.Setup(x => x.Request).Returns(request.Object);
+        Mocks.Add(httpContext);
+
+        var httpContextAccessor = new Mock<IHttpContextAccessor>();
+        httpContextAccessor.Setup(x => x.HttpContext).Returns(httpContext.Object);
+        Mocks.Add(httpContextAccessor);
+
         var serviceCollection = new ServiceCollection();
         serviceCollection
             .AddOpenIddict()
             .AddCore()
             .UseDynamoDb();
-        serviceCollection.AddIdentity();
-        serviceCollection.AddSingleton<IEmailSender, MockEmailSender>();
+        serviceCollection.AddSingleton<IEmailSender>(emailMock.Object);
         serviceCollection.AddControllers();
+        serviceCollection.AddSingleton<IHttpContextAccessor>(httpContextAccessor.Object);
+        serviceCollection.AddIdentity();
+        serviceCollection.AddMediatR();
 
         configure(serviceCollection);
 
         return serviceCollection.BuildServiceProvider();
     }
 
-    public async Task ControllerTest<T>(Func<IServiceProvider, object[]> getParams, Func<T, Task> actAndAssert)
+    protected async Task ControllerTest<T>(Func<IServiceProvider, object[]> getParams, Func<T, IServiceProvider, Task> actAndAssert)
         where T : Controller
     {
         using (var database = DynamoDbLocalServerUtils.CreateDatabase())
@@ -40,18 +71,10 @@ public abstract class TestBase
             AspNetCoreIdentityDynamoDbSetup.EnsureInitialized(serviceProvider);
             OpenIddictDynamoDbSetup.EnsureInitialized(serviceProvider);
 
-            var request = new Mock<HttpRequest>();
-            request.Setup(x => x.Scheme).Returns("http");
-            request.Setup(x => x.Host).Returns(HostString.FromUriComponent("http://gomsle.com"));
-            request.Setup(x => x.PathBase).Returns(PathString.FromUriComponent("/api"));
-
-            var httpContext = new Mock<HttpContext>();
-            httpContext.Setup(x => x.Request).Returns(request.Object);
-            httpContext.Setup(x => x.RequestServices).Returns(serviceProvider);
-
+            var httpContext = GetMock<HttpContext>();
             var controllerContext = new ControllerContext
             {
-                HttpContext = httpContext.Object,
+                HttpContext = httpContext!.Object,
             };
 
             var mockUrlHelper = new Mock<IUrlHelper>();
@@ -69,7 +92,7 @@ public abstract class TestBase
 
             try
             {
-                await actAndAssert(controller);
+                await actAndAssert(controller, serviceProvider);
             }
             catch(Exception)
             {

@@ -2,10 +2,9 @@ using Amazon.DynamoDBv2;
 using AspNetCore.Identity.AmazonDynamoDB;
 using Gomsle.Api.Features.Email;
 using Gomsle.Api.Infrastructure;
+using MediatR;
 using Microsoft.AspNetCore.CookiePolicy;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Logging;
-using OpenIddict.Abstractions;
 using OpenIddict.AmazonDynamoDB;
 using static OpenIddict.Abstractions.OpenIddictConstants;
 
@@ -105,7 +104,9 @@ public class Startup
             IdentityModelEventSource.ShowPII = true; 
         }
 
+        services.AddHttpContextAccessor();
         services.AddSingleton<IEmailSender, EmailSender>();
+        services.AddMediatR();
 
         services.AddAuthorization();
         services
@@ -131,7 +132,6 @@ public class Startup
         }
 
         app.UseCors();
-        app.UseStaticFiles();
         app.UseCookiePolicy();
         app.UseRouting();
         app.UseAuthentication();

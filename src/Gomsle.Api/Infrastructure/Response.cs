@@ -1,3 +1,5 @@
+using FluentValidation.Results;
+
 namespace Gomsle.Api.Infrastructure;
 
 public class Response<T> : Response, IResponse<T>
@@ -22,10 +24,10 @@ public class Response : IResponse
 {
     public Response()
     {
-        Errors = Enumerable.Empty<Error>();
+        Errors = Enumerable.Empty<ValidationFailure>();
     }
 
-    public Response(IEnumerable<Error> errors)
+    public Response(IEnumerable<ValidationFailure> errors)
     {
         Errors = errors;
     }
@@ -36,5 +38,5 @@ public class Response : IResponse
         private set {}
     }
 
-    public IEnumerable<Error> Errors { get; set; }
+    public IEnumerable<ValidationFailure> Errors { get; set; }
 }

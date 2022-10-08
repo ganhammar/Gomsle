@@ -1,24 +1,25 @@
 using AspNetCore.Identity.AmazonDynamoDB;
+using FluentValidation.Results;
 using Gomsle.Api.Features.Account;
 using Gomsle.Api.Features.Email;
-using Gomsle.Api.Infrastructure;
 using Gomsle.Api.Tests.Infrastructure;
+using MediatR;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
+using Moq;
 using Xunit;
 
 namespace Gomsle.Api.Tests.Features.Account;
 
+[Collection("Sequential")]
 public class AccountControllerTests : TestBase
 {
     private Func<IServiceProvider, object[]> ConfigureController = (services) =>
     {
-        var userManager = services.GetRequiredService<UserManager<DynamoDbUser>>();
-        var signInManager = services.GetRequiredService<SignInManager<DynamoDbUser>>();
-        var emailSender = services.GetRequiredService<IEmailSender>();
+        var mediator = services.GetRequiredService<IMediator>();
 
-        return new object[] { userManager, signInManager, emailSender };
+        return new object[] { mediator };
     };
 
     [Fact]
@@ -26,7 +27,7 @@ public class AccountControllerTests : TestBase
         // Arrange
         ConfigureController,
         // Act & Assert
-        async (controller) =>
+        async (controller, services) =>
         {
             var email = "test@gomsle.com";
             var result = await controller.Register(new()
@@ -42,12 +43,38 @@ public class AccountControllerTests : TestBase
 
             Assert.NotNull(okResult);
 
-            var response = okResult!.Value as IResponse<DynamoDbUser>;
+            var response = okResult!.Value as DynamoDbUser;
 
             Assert.NotNull(response);
-            Assert.True(response!.IsValid);
-            Assert.Empty(response.Errors);
-            Assert.Equal(email, response!.Result!.Email);
+            Assert.Equal(email, response!.Email);
+
+            var mock = GetMock<IEmailSender>();
+            mock!.Verify(x => 
+                x.Send(email, It.IsAny<string>(), It.IsAny<string>()),
+                Times.Once());
+        });
+
+    [Fact]
+    public async Task Should_SendEmail_When_Registering() => await ControllerTest<AccountController>(
+        // Arrange
+        ConfigureController,
+        // Act & Assert
+        async (controller, services) =>
+        {
+            var email = "test@gomsle.com";
+            var result = await controller.Register(new()
+            {
+                Email = email,
+                Password = "itsaseasyas123",
+                ReturnUrl = "http://gomsle.com",
+            }) as OkObjectResult;
+
+            var response = result!.Value as DynamoDbUser;
+
+            var mock = GetMock<IEmailSender>();
+            mock!.Verify(x => 
+                x.Send(email, It.IsAny<string>(), It.IsAny<string>()),
+                Times.Once());
         });
 
     [Fact]
@@ -55,13 +82,12 @@ public class AccountControllerTests : TestBase
         // Arrange
         ConfigureController,
         // Act & Assert
-        async (controller) =>
+        async (controller, services) =>
         {
             var email = "test@gomsle.com";
 
-            var userManager = controller.HttpContext.RequestServices
-                .GetRequiredService<UserManager<DynamoDbUser>>();
-            var createResult = await userManager.CreateAsync(new()
+            var userManager = services.GetRequiredService<UserManager<DynamoDbUser>>();
+            await userManager.CreateAsync(new()
             {
                 Email = email,
                 UserName = email,
@@ -80,11 +106,36 @@ public class AccountControllerTests : TestBase
 
             Assert.NotNull(badRequestResult);
 
-            var response = badRequestResult!.Value as IResponse;
+            var errors = badRequestResult!.Value as IEnumerable<ValidationFailure>;
 
-            Assert.NotNull(response);
-            Assert.False(response!.IsValid);
-            Assert.NotEmpty(response.Errors);
-            Assert.Contains(response.Errors, error => error.Code == "DuplicateEmail");
+            Assert.NotNull(errors);
+            Assert.Contains(errors, error => error.ErrorCode == "DuplicateEmail");
+        });
+
+    [Fact]
+    public async Task Should_ReturnBadRequest_When_EmailIsNotSet() => await ControllerTest<AccountController>(
+        // Arrange
+        ConfigureController,
+        // Act & Assert
+        async (controller, services) =>
+        {
+            var result = await controller.Register(new()
+            {
+                Email = string.Empty,
+                Password = "itsaseasyas123",
+                ReturnUrl = "http://gomsle.com",
+            });
+
+            Assert.NotNull(result);
+
+            var badRequestResult = result as BadRequestObjectResult;
+
+            Assert.NotNull(badRequestResult);
+
+            var errors = badRequestResult!.Value as IEnumerable<ValidationFailure>;
+
+            Assert.NotEmpty(errors);
+            Assert.Contains(errors, error =>
+                error.ErrorCode == "NotEmptyValidator" && error.PropertyName == "Email");
         });
 }

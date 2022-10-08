@@ -1,8 +1,10 @@
+using FluentValidation.Results;
+
 namespace Gomsle.Api.Infrastructure;
 
 public interface IResponse
 {
-    IEnumerable<Error> Errors { get; set; }
+    IEnumerable<ValidationFailure> Errors { get; set; }
 
     bool IsValid { get; }
 }
