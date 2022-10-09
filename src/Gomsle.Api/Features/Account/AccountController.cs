@@ -21,16 +21,12 @@ public class AccountController : ApiControllerBase
 
     [HttpGet]
     [AllowAnonymous]
-    public async Task<IActionResult> Confirm(string userId, string token, string returnUrl)
+    public async Task<IActionResult> Confirm(ConfirmAccount.Command command)
     {
-        var result = await _mediator.Send(new ConfirmAccount.Command
-        {
-            UserId = userId,
-            Token = token,
-        });
+        var result = await _mediator.Send(command);
 
         if (result.IsValid) {
-            return Redirect(returnUrl);
+            return Redirect(command.ReturnUrl!);
         }
 
         return Forbid();
@@ -40,4 +36,17 @@ public class AccountController : ApiControllerBase
     [AllowAnonymous]
     public async Task<IActionResult> Forgot(ForgotPassword.Command command)
         => Respond(await _mediator.Send(command));
+
+    [HttpGet]
+    [AllowAnonymous]
+    public async Task<IActionResult> Reset(ResetPassword.Command command)
+    {
+        var result = await _mediator.Send(command);
+
+        if (result.IsValid) {
+            return Redirect(command.ReturnUrl!);
+        }
+
+        return Forbid();
+    }
 }

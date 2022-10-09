@@ -28,6 +28,7 @@ public class ConfirmAccountTests : TestBase
             {
                 UserId = user.Id,
                 Token = token,
+                ReturnUrl = "https://gomsle.com",
             };
 
             // Act
@@ -54,6 +55,7 @@ public class ConfirmAccountTests : TestBase
             var command = new ConfirmAccount.Command
             {
                 Token = token,
+                ReturnUrl = "https://gomsle.com",
             };
             var validator = new ConfirmAccount.CommandValidator(userManager);
 
@@ -84,6 +86,7 @@ public class ConfirmAccountTests : TestBase
             {
                 UserId = Guid.NewGuid().ToString(),
                 Token = token,
+                ReturnUrl = "https://gomsle.com",
             };
             var validator = new ConfirmAccount.CommandValidator(userManager);
 
@@ -111,6 +114,7 @@ public class ConfirmAccountTests : TestBase
             var command = new ConfirmAccount.Command
             {
                 UserId = user.Id,
+                ReturnUrl = "https://gomsle.com",
             };
             var validator = new ConfirmAccount.CommandValidator(userManager);
 
@@ -121,6 +125,34 @@ public class ConfirmAccountTests : TestBase
             Assert.False(response.IsValid);
             Assert.Contains(response.Errors, error =>
                 error.ErrorCode == "NotEmptyValidator" && error.PropertyName == "Token");
+        });
+
+    [Fact]
+    public async Task Should_NotBeValid_When_ReturnUrlIsNotSet() =>
+        await MediatorTest(async (mediator, services) =>
+        {
+            // Arrange
+            var userManager = services.GetRequiredService<UserManager<DynamoDbUser>>();
+            var user = new DynamoDbUser
+            {
+                Email = "test@gomsle.com",
+                UserName = "test@gomsle.com",
+            };
+            await userManager.CreateAsync(user);
+            var command = new ConfirmAccount.Command
+            {
+                UserId = user.Id,
+                Token = "a-confirm-token",
+            };
+            var validator = new ConfirmAccount.CommandValidator(userManager);
+
+            // Act
+            var response = await validator.ValidateAsync(command);
+
+            // Assert
+            Assert.False(response.IsValid);
+            Assert.Contains(response.Errors, error =>
+                error.ErrorCode == "NotEmptyValidator" && error.PropertyName == "ReturnUrl");
         });
 
     [Fact]
@@ -140,6 +172,7 @@ public class ConfirmAccountTests : TestBase
             {
                 UserId = user.Id,
                 Token = Guid.NewGuid().ToString(),
+                ReturnUrl = "https://gomsle.com",
             };
 
             // Act

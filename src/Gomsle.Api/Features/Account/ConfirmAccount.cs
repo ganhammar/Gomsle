@@ -13,6 +13,7 @@ public class ConfirmAccount
     {
         public string? UserId { get; set; }
         public string? Token { get; set; }
+        public string? ReturnUrl { get; set; }
     }
 
     public class CommandValidator : AbstractValidator<Command>
@@ -35,6 +36,9 @@ public class ConfirmAccount
             });
 
             RuleFor(x => x.Token)
+                .NotEmpty();
+
+            RuleFor(x => x.ReturnUrl)
                 .NotEmpty();
         }
     }

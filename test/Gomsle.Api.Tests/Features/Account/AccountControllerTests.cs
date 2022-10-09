@@ -156,15 +156,15 @@ public class AccountControllerTests : TestBase
             };
             await userManager.CreateAsync(user);
             var token = await userManager.GenerateEmailConfirmationTokenAsync(user);
-            var command = new ConfirmAccount.Command
-            {
-                UserId = user.Id,
-                Token = token,
-            };
             var url = "https://gomsle.com/my-client-app";
 
             // Act
-            var result = await controller.Confirm(user.Id, token, url);
+            var result = await controller.Confirm(new()
+            {
+                ReturnUrl = url,
+                Token = token,
+                UserId = user.Id,
+            });
 
             // Assert
             Assert.NotNull(result);
@@ -183,7 +183,7 @@ public class AccountControllerTests : TestBase
         async (controller, services) =>
         {
             // Act
-            var result = await controller.Confirm(string.Empty, string.Empty, string.Empty);
+            var result = await controller.Confirm(new());
 
             // Assert
             Assert.NotNull(result);
@@ -227,5 +227,60 @@ public class AccountControllerTests : TestBase
             mock!.Verify(x => 
                 x.Send(email, It.IsAny<string>(), It.IsAny<string>()),
                 Times.Once());
+        });
+
+    [Fact]
+    public async Task Should_ResetPassword_When_RequestIsValid() => await ControllerTest<AccountController>(
+        // Arrange
+        ConfigureController,
+        // Act & Assert
+        async (controller, services) =>
+        {
+            // Arrange
+            var userManager = services.GetRequiredService<UserManager<DynamoDbUser>>();
+            var user = new DynamoDbUser
+            {
+                Email = "test@gomsle.com",
+                UserName = "test@gomsle.com",
+                EmailConfirmed = false,
+            };
+            await userManager.CreateAsync(user);
+            var token = await userManager.GeneratePasswordResetTokenAsync(user);
+            var url = "https://gomsle.com/my-client-app";
+
+            // Act
+            var result = await controller.Reset(new()
+            {
+                ReturnUrl = url,
+                Token = token,
+                UserId = user.Id,
+                Password = "itsaseasyas123",
+            });
+
+            // Assert
+            Assert.NotNull(result);
+
+            var redirectResult = result as RedirectResult;
+
+            Assert.NotNull(redirectResult);
+            Assert.Equal(url, redirectResult!.Url);
+        });
+
+    [Fact]
+    public async Task Should_ReturnForbidden_When_ResetRequestIsInvalid() => await ControllerTest<AccountController>(
+        // Arrange
+        ConfigureController,
+        // Act & Assert
+        async (controller, services) =>
+        {
+            // Act
+            var result = await controller.Reset(new());
+
+            // Assert
+            Assert.NotNull(result);
+
+            var forbidResult = result as ForbidResult;
+
+            Assert.NotNull(forbidResult);
         });
 }
