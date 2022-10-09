@@ -138,4 +138,58 @@ public class AccountControllerTests : TestBase
             Assert.Contains(errors, error =>
                 error.ErrorCode == "NotEmptyValidator" && error.PropertyName == "Email");
         });
+
+    [Fact]
+    public async Task Should_ConfirmAccount_When_RequestIsValid() => await ControllerTest<AccountController>(
+        // Arrange
+        ConfigureController,
+        // Act & Assert
+        async (controller, services) =>
+        {
+            // Arrange
+            var userManager = services.GetRequiredService<UserManager<DynamoDbUser>>();
+            var user = new DynamoDbUser
+            {
+                Email = "test@gomsle.com",
+                UserName = "test@gomsle.com",
+                EmailConfirmed = false,
+            };
+            await userManager.CreateAsync(user);
+            var token = await userManager.GenerateEmailConfirmationTokenAsync(user);
+            var command = new ConfirmAccount.Command
+            {
+                UserId = user.Id,
+                Token = token,
+            };
+            var url = "https://gomsle.com/my-client-app";
+
+            // Act
+            var result = await controller.Confirm(user.Id, token, url);
+
+            // Assert
+            Assert.NotNull(result);
+
+            var redirectResult = result as RedirectResult;
+
+            Assert.NotNull(redirectResult);
+            Assert.Equal(url, redirectResult!.Url);
+        });
+
+    [Fact]
+    public async Task Should_ReturnForbidden_When_ConfirmRequestIsInvalid() => await ControllerTest<AccountController>(
+        // Arrange
+        ConfigureController,
+        // Act & Assert
+        async (controller, services) =>
+        {
+            // Act
+            var result = await controller.Confirm(string.Empty, string.Empty, string.Empty);
+
+            // Assert
+            Assert.NotNull(result);
+
+            var forbidResult = result as ForbidResult;
+
+            Assert.NotNull(forbidResult);
+        });
 }

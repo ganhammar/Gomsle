@@ -16,6 +16,23 @@ public class AccountController : ApiControllerBase
 
     [HttpPost]
     [AllowAnonymous]
-    public async Task<IActionResult> Register(RegisterCommand.Command command)
+    public async Task<IActionResult> Register(RegisterAccount.Command command)
         => Respond(await _mediator.Send(command));
+
+    [HttpGet]
+    [AllowAnonymous]
+    public async Task<IActionResult> Confirm(string userId, string token, string returnUrl)
+    {
+        var result = await _mediator.Send(new ConfirmAccount.Command
+        {
+            UserId = userId,
+            Token = token,
+        });
+
+        if (result.IsValid) {
+            return Redirect(returnUrl);
+        }
+
+        return Forbid();
+    }
 }

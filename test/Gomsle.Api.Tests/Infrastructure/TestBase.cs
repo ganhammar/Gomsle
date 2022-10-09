@@ -64,7 +64,7 @@ public abstract class TestBase
         return serviceCollection.BuildServiceProvider();
     }
 
-    protected async Task MediatorTest<T>(IRequest<T> message, Action<T> assert)
+    protected async Task MediatorTest(Func<IMediator, IServiceProvider, Task> assert)
     {
         using (var database = DynamoDbLocalServerUtils.CreateDatabase())
         {
@@ -73,13 +73,12 @@ public abstract class TestBase
 
             AspNetCoreIdentityDynamoDbSetup.EnsureInitialized(serviceProvider);
             OpenIddictDynamoDbSetup.EnsureInitialized(serviceProvider);
-
-            var mediator = serviceProvider.GetRequiredService<IMediator>();
             
+            var mediator = serviceProvider.GetRequiredService<IMediator>();
+
             try
             {
-                var response = await mediator.Send(message);
-                assert(response);
+                await assert(mediator, serviceProvider);
             }
             catch(Exception)
             {

@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Identity;
 
 namespace Gomsle.Api.Features.Account;
 
-public class RegisterCommand
+public class RegisterAccount
 {
     public class Command : IRequest<IResponse<DynamoDbUser>>
     {
@@ -66,6 +66,8 @@ public class RegisterCommand
             {
                 UserName = request.UserName ?? request.Email,
                 Email = request.Email,
+                EmailConfirmed = false,
+                PhoneNumberConfirmed = false,
             };
 
             var result = await _userManager.CreateAsync(user, request.Password);
