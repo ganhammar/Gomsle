@@ -35,4 +35,9 @@ public class AccountController : ApiControllerBase
 
         return Forbid();
     }
+
+    [HttpPost]
+    [AllowAnonymous]
+    public async Task<IActionResult> Forgot(ForgotPassword.Command command)
+        => Respond(await _mediator.Send(command));
 }

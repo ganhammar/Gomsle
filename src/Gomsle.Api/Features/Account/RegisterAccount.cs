@@ -92,7 +92,7 @@ public class RegisterAccount
         {
             var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
             var request = _httpContextAccessor.HttpContext!.Request;
-            var url = $"{request.Protocol}://{request.Host}/confirm/account"
+            var url = $"{request.Protocol}://{request.Host}/account/confirm"
                 + $"?UserId={user.Id}&Token={token}&ReturnUrl={returnUrl}";
 
             var body = $"Follow the link below to confirm your Gömsle account:<br /><a href=\"{url}\">{url}</a>";

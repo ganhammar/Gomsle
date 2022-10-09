@@ -192,4 +192,40 @@ public class AccountControllerTests : TestBase
 
             Assert.NotNull(forbidResult);
         });
+
+    [Fact]
+    public async Task Should_SendResetEmail_When_ForgotRequestIsValid() => await ControllerTest<AccountController>(
+        // Arrange
+        ConfigureController,
+        // Act & Assert
+        async (controller, services) =>
+        {
+            // Arrange
+            var userManager = services.GetRequiredService<UserManager<DynamoDbUser>>();
+            var email = "test@gomsle.com";
+            var user = new DynamoDbUser
+            {
+                Email = email,
+                UserName = "test@gomsle.com",
+                EmailConfirmed = false,
+            };
+            await userManager.CreateAsync(user);
+            var command = new ForgotPassword.Command
+            {
+                Email = email,
+                ResetUrl = "https://gomsle.com/reset",
+            };
+
+            // Act
+            var result = await controller.Forgot(command);
+
+            // Assert
+            Assert.NotNull(result);
+            Assert.IsType<NoContentResult>(result);
+
+            var mock = GetMock<IEmailSender>();
+            mock!.Verify(x => 
+                x.Send(email, It.IsAny<string>(), It.IsAny<string>()),
+                Times.Once());
+        });
 }
