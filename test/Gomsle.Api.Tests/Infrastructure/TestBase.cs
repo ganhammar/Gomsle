@@ -3,7 +3,10 @@ using AspNetCore.Identity.AmazonDynamoDB;
 using Gomsle.Api.Features.Email;
 using Gomsle.Api.Infrastructure;
 using MediatR;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
@@ -55,13 +58,18 @@ public abstract class TestBase
         serviceCollection.AddSingleton<IHttpContextAccessor>(httpContextAccessor.Object);
         serviceCollection.AddIdentity();
         serviceCollection.AddMediatR();
+        serviceCollection.AddSingleton<SignInManager<DynamoDbUser>, MockSignInManager>();
 
         if (configure != default)
         {
             configure(serviceCollection);
         }
 
-        return serviceCollection.BuildServiceProvider();
+        var services = serviceCollection.BuildServiceProvider();
+
+        httpContext.Setup(x => x.RequestServices).Returns(services);
+
+        return services;
     }
 
     protected async Task MediatorTest(Func<IMediator, IServiceProvider, Task> assert)
