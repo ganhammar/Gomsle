@@ -59,4 +59,9 @@ public class AccountController : ApiControllerBase
     [AllowAnonymous]
     public async Task<IActionResult> GetTwoFactorProviders(GetTwoFactorProviders.Query query)
         => Respond(await _mediator.Send(query));
+
+    [HttpPost]
+    [AllowAnonymous]
+    public async Task<IActionResult> SendCode(SendCode.Command command)
+        => Respond(await _mediator.Send(command));
 }

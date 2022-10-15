@@ -28,12 +28,12 @@ public class GetTwoFactorProviders
         }
     }
 
-    public class CommandHandler : Handler<Query, IResponse<List<string>>>
+    public class QueryHandler : Handler<Query, IResponse<List<string>>>
     {
         private readonly UserManager<DynamoDbUser> _userManager;
         private readonly SignInManager<DynamoDbUser> _signInManager;
 
-        public CommandHandler(
+        public QueryHandler(
             UserManager<DynamoDbUser> userManager,
             SignInManager<DynamoDbUser> signInManager)
         {

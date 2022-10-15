@@ -359,7 +359,7 @@ public class AccountControllerTests : TestBase
         });
 
     [Fact]
-    public async Task Should_ReturnForbidden_When_NoLoginIsInProgress() => await ControllerTest<AccountController>(
+    public async Task Should_ReturnBadRequest_When_GettingListOfTwoFactorProvidersAndNoLoginIsInProgress() => await ControllerTest<AccountController>(
         // Arrange
         ConfigureController,
         // Act & Assert
@@ -367,6 +367,63 @@ public class AccountControllerTests : TestBase
         {
             // Act
             var result = await controller.GetTwoFactorProviders(new());
+
+            // Assert
+            Assert.NotNull(result);
+
+            var badRequestObjectResult = result as BadRequestObjectResult;
+            Assert.NotNull(badRequestObjectResult);
+        });
+
+    [Fact]
+    public async Task Should_RetunNoContent_When_SendingCodeAndLoginIsInProgress() => await ControllerTest<AccountController>(
+        // Arrange
+        ConfigureController,
+        // Act & Assert
+        async (controller, services) =>
+        {
+            // Arrange
+            var userManager = services.GetRequiredService<UserManager<DynamoDbUser>>();
+            var email = "valid@gomsle.com";
+            var password = "itsaseasyas123";
+            await userManager.CreateAsync(new()
+            {
+                Email = email,
+                UserName = email,
+                EmailConfirmed = true,
+                TwoFactorEnabled = true,
+            });
+            await controller.Login(new()
+            {
+                Email = email,
+                Password = password,
+            });
+
+            // Act
+            var result = await controller.SendCode(new()
+            {
+                Provider = "Email",
+            });
+
+            // Assert
+            Assert.NotNull(result);
+
+            var noContentResult = result as NoContentResult;
+            Assert.NotNull(noContentResult);
+        });
+
+    [Fact]
+    public async Task Should_ReturnBadRequest_When_SendingCodeAndNoLoginIsInProgress() => await ControllerTest<AccountController>(
+        // Arrange
+        ConfigureController,
+        // Act & Assert
+        async (controller, services) =>
+        {
+            // Act
+            var result = await controller.SendCode(new()
+            {
+                Provider = "Email",
+            });
 
             // Assert
             Assert.NotNull(result);
