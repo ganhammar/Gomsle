@@ -283,4 +283,95 @@ public class AccountControllerTests : TestBase
 
             Assert.NotNull(forbidResult);
         });
+
+    [Fact]
+    public async Task Should_LoginUser_When_RequestIsValid() => await ControllerTest<AccountController>(
+        // Arrange
+        ConfigureController,
+        // Act & Assert
+        async (controller, services) =>
+        {
+            // Arrange
+            var userManager = services.GetRequiredService<UserManager<DynamoDbUser>>();
+            var email = "valid@gomsle.com";
+            var password = "itsaseasyas123";
+            await userManager.CreateAsync(new()
+            {
+                Email = email,
+                UserName = email,
+                EmailConfirmed = true,
+            });
+
+            // Act
+            var result = await controller.Login(new()
+            {
+                Email = email,
+                Password = password,
+            });
+
+            // Assert
+            Assert.NotNull(result);
+
+            var okObjectResult = result as OkObjectResult;
+            Assert.NotNull(okObjectResult);
+            
+            var signInResult = okObjectResult!.Value as Microsoft.AspNetCore.Identity.SignInResult;
+            Assert.NotNull(signInResult);
+            Assert.True(signInResult!.Succeeded);
+        });
+
+    [Fact]
+    public async Task Should_ReturnListOfTwoFactorProviders_When_LoginIsInProgress() => await ControllerTest<AccountController>(
+        // Arrange
+        ConfigureController,
+        // Act & Assert
+        async (controller, services) =>
+        {
+            // Arrange
+            var userManager = services.GetRequiredService<UserManager<DynamoDbUser>>();
+            var email = "valid@gomsle.com";
+            var password = "itsaseasyas123";
+            await userManager.CreateAsync(new()
+            {
+                Email = email,
+                UserName = email,
+                EmailConfirmed = true,
+                TwoFactorEnabled = true,
+            });
+            await controller.Login(new()
+            {
+                Email = email,
+                Password = password,
+            });
+
+            // Act
+            var result = await controller.GetTwoFactorProviders(new());
+
+            // Assert
+            Assert.NotNull(result);
+
+            var okObjectResult = result as OkObjectResult;
+            Assert.NotNull(okObjectResult);
+
+            var providers = okObjectResult!.Value as List<string>;
+            Assert.NotEmpty(providers);
+            Assert.Contains(providers, x => x == "Email");
+        });
+
+    [Fact]
+    public async Task Should_ReturnForbidden_When_NoLoginIsInProgress() => await ControllerTest<AccountController>(
+        // Arrange
+        ConfigureController,
+        // Act & Assert
+        async (controller, services) =>
+        {
+            // Act
+            var result = await controller.GetTwoFactorProviders(new());
+
+            // Assert
+            Assert.NotNull(result);
+
+            var badRequestObjectResult = result as BadRequestObjectResult;
+            Assert.NotNull(badRequestObjectResult);
+        });
 }

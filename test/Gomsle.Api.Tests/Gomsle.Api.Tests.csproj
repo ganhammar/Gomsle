@@ -8,7 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="AspNetCore.Identity.AmazonDynamoDB" Version="0.1.3" />
+    <PackageReference Include="AspNetCore.Identity.AmazonDynamoDB" Version="0.2.0" />
     <PackageReference Include="AWSSDK.DynamoDBv2" Version="3.7.5.14" />
     <PackageReference Include="Community.OpenIddict.AmazonDynamoDB" Version="0.1.3" />
     <PackageReference Include="coverlet.msbuild" Version="3.1.2">

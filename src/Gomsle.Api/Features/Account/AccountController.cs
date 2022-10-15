@@ -49,4 +49,14 @@ public class AccountController : ApiControllerBase
 
         return Forbid();
     }
+
+    [HttpPost]
+    [AllowAnonymous]
+    public async Task<IActionResult> Login(Login.Command command)
+        => Respond(await _mediator.Send(command));
+    
+    [HttpGet]
+    [AllowAnonymous]
+    public async Task<IActionResult> GetTwoFactorProviders(GetTwoFactorProviders.Query query)
+        => Respond(await _mediator.Send(query));
 }

@@ -36,7 +36,6 @@ public class LoginTests : TestBase
             };
 
             // Act
-            services.GetRequiredService<IServiceProvider>();
             var response = await mediator.Send(command);
 
             // Assert
