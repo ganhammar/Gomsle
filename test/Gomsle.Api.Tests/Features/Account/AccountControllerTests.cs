@@ -431,4 +431,48 @@ public class AccountControllerTests : TestBase
             var badRequestObjectResult = result as BadRequestObjectResult;
             Assert.NotNull(badRequestObjectResult);
         });
+
+    [Fact]
+    public async Task Should_BeSuccessfull_When_VerifyingCodeThatIsCorrect() => await ControllerTest<AccountController>(
+        // Arrange
+        ConfigureController,
+        // Act & Assert
+        async (controller, services) =>
+        {
+            // Arrange
+            var userManager = services.GetRequiredService<UserManager<DynamoDbUser>>();
+            var email = "valid@gomsle.com";
+            var password = "itsaseasyas123";
+            var user = new DynamoDbUser
+            {
+                Email = email,
+                UserName = email,
+                EmailConfirmed = true,
+                TwoFactorEnabled = true,
+            };
+            await userManager.CreateAsync(user);
+            await controller.Login(new()
+            {
+                Email = email,
+                Password = password,
+            });
+            var code = await userManager.GenerateTwoFactorTokenAsync(user, "Email");
+
+            // Act
+            var result = await controller.VerifyCode(new()
+            {
+                Provider = "Email",
+                Code = code,
+            });
+
+            // Assert
+            Assert.NotNull(result);
+
+            var okObjectResult = result as OkObjectResult;
+            Assert.NotNull(okObjectResult);
+
+            var signInResult = okObjectResult!.Value as Microsoft.AspNetCore.Identity.SignInResult;
+            Assert.NotNull(signInResult);
+            Assert.True(signInResult!.Succeeded);
+        });
 }

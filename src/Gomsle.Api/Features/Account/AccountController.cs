@@ -64,4 +64,9 @@ public class AccountController : ApiControllerBase
     [AllowAnonymous]
     public async Task<IActionResult> SendCode(SendCode.Command command)
         => Respond(await _mediator.Send(command));
+
+    [HttpPost]
+    [AllowAnonymous]
+    public async Task<IActionResult> VerifyCode(VerifyCode.Command command)
+        => Respond(await _mediator.Send(command));
 }

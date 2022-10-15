@@ -37,6 +37,18 @@ public class MockSignInManager : SignInManager<DynamoDbUser>
         return Task.FromResult(SignInResult.Failed);
     }
 
+    public override async Task<SignInResult> TwoFactorSignInAsync(string provider, string code, bool isPersistent, bool rememberClient)
+    {
+        var user = await GetTwoFactorAuthenticationUserAsync();
+        if (user == default)
+        {
+            return SignInResult.Failed;
+        }
+
+        var result = await UserManager.VerifyTwoFactorTokenAsync(user, provider, code);
+        return result ? SignInResult.Success : SignInResult.Failed;
+    }
+
     public override async Task<DynamoDbUser> GetTwoFactorAuthenticationUserAsync()
     {
         if (!_signInRequetInProgress)
