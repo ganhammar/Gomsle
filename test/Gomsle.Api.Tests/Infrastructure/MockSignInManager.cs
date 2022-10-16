@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using Amazon.DynamoDBv2;
 using Amazon.DynamoDBv2.DataModel;
 using AspNetCore.Identity.AmazonDynamoDB;
@@ -24,17 +25,19 @@ public class MockSignInManager : SignInManager<DynamoDbUser>
     {
     }
 
+    public DynamoDbUser? CurrentUser { get; set; }
     private bool _signInRequetInProgress = false;
 
-    public override Task<SignInResult> PasswordSignInAsync(string userName, string password, bool isPersistent, bool lockoutOnFailure)
+    public override async Task<SignInResult> PasswordSignInAsync(string userName, string password, bool isPersistent, bool lockoutOnFailure)
     {
         if (userName == "valid@gomsle.com" && password == "itsaseasyas123")
         {
             _signInRequetInProgress = true;
-            return Task.FromResult(SignInResult.Success);
+            CurrentUser = await FindFirstUser();
+            return SignInResult.Success;
         }
 
-        return Task.FromResult(SignInResult.Failed);
+        return SignInResult.Failed;
     }
 
     public override async Task<SignInResult> TwoFactorSignInAsync(string provider, string code, bool isPersistent, bool rememberClient)
@@ -46,7 +49,14 @@ public class MockSignInManager : SignInManager<DynamoDbUser>
         }
 
         var result = await UserManager.VerifyTwoFactorTokenAsync(user, provider, code);
-        return result ? SignInResult.Success : SignInResult.Failed;
+        if (result)
+        {
+            CurrentUser = user;
+            return SignInResult.Success;
+        }
+
+        CurrentUser = default;
+        return SignInResult.Failed;
     }
 
     public override async Task<DynamoDbUser> GetTwoFactorAuthenticationUserAsync()
@@ -56,11 +66,30 @@ public class MockSignInManager : SignInManager<DynamoDbUser>
             return default!;
         }
 
+        CurrentUser = await FindFirstUser();
+        return CurrentUser;
+    }
+
+    public override Task<ClaimsPrincipal> CreateUserPrincipalAsync(DynamoDbUser user)
+        => Task.FromResult(CreateClaimsPrincipal(user));
+
+    public ClaimsPrincipal CreateClaimsPrincipal(DynamoDbUser user)
+    {
+        return new ClaimsPrincipal(new ClaimsIdentity(new List<Claim>
+        {
+            new Claim(ClaimTypes.Email, user.Email),
+            new Claim(ClaimTypes.Name, user.Id),
+            new Claim(ClaimTypes.NameIdentifier, user.Id),
+            new Claim(TestBase.UserIdClaimType, user.Id),
+        }, "TestAuth"));
+    }
+
+    private async Task<DynamoDbUser> FindFirstUser()
+    {
         var database = base.Context.RequestServices.GetRequiredService<IAmazonDynamoDB>();
         var context = new DynamoDBContext(database);
         var scan = context.ScanAsync<DynamoDbUser>(new List<ScanCondition>());
         var users = await scan.GetNextSetAsync();
-
         return users.First();
     }
 }

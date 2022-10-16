@@ -1,10 +1,9 @@
+using System.Security.Claims;
 using Amazon.DynamoDBv2;
 using AspNetCore.Identity.AmazonDynamoDB;
 using Gomsle.Api.Features.Email;
 using Gomsle.Api.Infrastructure;
 using MediatR;
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -29,6 +28,8 @@ public abstract class TestBase
                 .IsAssignableFrom(typeof(T)))
             .FirstOrDefault() as Mock<T>;
     }
+
+    public static string UserIdClaimType = "sub";
 
     protected IServiceProvider GetServiceProvider(Action<IServiceCollection>? configure = default)
     {
@@ -59,6 +60,10 @@ public abstract class TestBase
         serviceCollection.AddIdentity();
         serviceCollection.AddMediatR();
         serviceCollection.AddSingleton<SignInManager<DynamoDbUser>, MockSignInManager>();
+        serviceCollection.Configure<IdentityOptions>(options =>
+        {
+            options.ClaimsIdentity.UserIdClaimType = UserIdClaimType;
+        });
 
         if (configure != default)
         {
@@ -68,6 +73,16 @@ public abstract class TestBase
         var services = serviceCollection.BuildServiceProvider();
 
         httpContext.Setup(x => x.RequestServices).Returns(services);
+        httpContext.Setup(x => x.User).Returns(() =>
+        {
+            var signInManager = services.GetRequiredService<SignInManager<DynamoDbUser>>() as MockSignInManager;
+            if (signInManager?.CurrentUser == default)
+            {
+                return default(ClaimsPrincipal)!;
+            }
+
+            return signInManager.CreateClaimsPrincipal(signInManager.CurrentUser);
+        });
 
         return services;
     }
