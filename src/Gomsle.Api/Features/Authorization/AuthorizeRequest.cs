@@ -39,7 +39,7 @@ public class AuthorizeRequest
                         || request!.HasPrompt(Prompts.None) == false;
                 })
                 .WithErrorCode(Errors.LoginRequired)
-                .WithMessage("The user is not logged in");
+                .WithMessage("Login required");
         }
     }
 
