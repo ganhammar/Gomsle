@@ -139,4 +139,21 @@ public class AuthorizationControllerTests : TestBase
             var forbidResult = result as ForbidResult;
             Assert.NotNull(forbidResult);
         });
+
+    [Fact]
+    public async Task Should_Return_When_LoggingOut() => await ControllerTest<AuthorizationController>(
+        // Arrange
+        ConfigureController,
+        // Act & Assert
+        async (controller, services) =>
+        {
+            // Act
+            var result = await controller.Logout(new());
+
+            // Assert
+            Assert.NotNull(result);
+
+            var signOutResult = result as SignOutResult;
+            Assert.NotNull(signOutResult);
+        });
 }

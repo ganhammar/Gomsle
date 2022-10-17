@@ -84,6 +84,11 @@ public class MockSignInManager : SignInManager<DynamoDbUser>
         }, "TestAuth"));
     }
 
+    public override Task SignOutAsync()
+    {
+        return Task.CompletedTask;
+    }
+
     private async Task<DynamoDbUser> FindFirstUser()
     {
         var database = base.Context.RequestServices.GetRequiredService<IAmazonDynamoDB>();
