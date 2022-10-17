@@ -44,4 +44,20 @@ public class AuthorizationController : ApiControllerBase
 
         return SignOut(OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
     }
+
+    [HttpPost("~/connect/token")]
+    [Produces("application/json")]
+    public async Task<IActionResult> Exchange(Exchange.Command command)
+    {
+        var result = await _mediator.Send(command);
+
+        if (result.IsValid == false)
+        {
+            return Forbid(new AuthenticationProperties(
+                result.Errors.ToDictionary(x => x.ErrorCode, x => x.ErrorMessage)!),
+                OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
+        }
+
+        return SignIn(result.Result!, OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
+    }
 }

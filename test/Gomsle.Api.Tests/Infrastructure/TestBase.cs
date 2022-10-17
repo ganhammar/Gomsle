@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using OpenIddict.AmazonDynamoDB;
+using static OpenIddict.Abstractions.OpenIddictConstants;
 
 namespace Gomsle.Api.Tests.Infrastructure;
 
@@ -28,8 +29,6 @@ public abstract class TestBase
                 .IsAssignableFrom(typeof(T)))
             .FirstOrDefault() as Mock<T>;
     }
-
-    public static string UserIdClaimType = "sub";
 
     protected IServiceProvider GetServiceProvider(Action<IServiceCollection>? configure = default)
     {
@@ -62,7 +61,7 @@ public abstract class TestBase
         serviceCollection.AddSingleton<SignInManager<DynamoDbUser>, MockSignInManager>();
         serviceCollection.Configure<IdentityOptions>(options =>
         {
-            options.ClaimsIdentity.UserIdClaimType = UserIdClaimType;
+            options.ClaimsIdentity.UserIdClaimType = Claims.Subject;
         });
 
         if (configure != default)

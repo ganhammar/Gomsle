@@ -1,12 +1,10 @@
-using AspNetCore.Identity.AmazonDynamoDB;
-using Gomsle.Api.Features.Account;
 using Gomsle.Api.Features.Authorization;
 using Gomsle.Api.Tests.Infrastructure;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Features;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
 using OpenIddict.Abstractions;
+using OpenIddict.AmazonDynamoDB;
 using OpenIddict.Server;
 using OpenIddict.Server.AspNetCore;
 using Xunit;
@@ -15,30 +13,21 @@ using static OpenIddict.Abstractions.OpenIddictConstants;
 namespace Gomsle.Api.Tests.Features.Authorize;
 
 [Collection("Sequential")]
-public class AuthorizeRequestTests : TestBase
+public class ExchangeTests : TestBase
 {
     [Fact]
-    public async Task Should_ReturnPrincipal_When_UserIsAuthenticated() =>
+    public async Task Should_ReturnPrincipal_When_RequestIsValid() =>
         await MediatorTest(async (mediator, services) =>
         {
             // Arrange
-            var userManager = services.GetRequiredService<UserManager<DynamoDbUser>>();
-            var email = "valid@gomsle.com";
-            var password = "itsaseasyas123";
-            var user = new DynamoDbUser
+            var applicationManager = services.GetRequiredService<IOpenIddictApplicationManager>();
+            var clientId = Guid.NewGuid().ToString();
+            var clientSecret = Guid.NewGuid().ToString();
+            var application = new OpenIddictDynamoDbApplication
             {
-                Email = email,
-                UserName = email,
-                EmailConfirmed = true,
-                TwoFactorEnabled = false,
+                ClientId = clientId,
             };
-            await userManager.CreateAsync(user, password);
-            await mediator.Send(new Login.Command
-            {
-                Email = email,
-                Password = password,
-                RememberMe = false,
-            });
+            await applicationManager.CreateAsync(application, clientSecret);
             var httpContext = GetMock<HttpContext>();
             var featureCollection = new FeatureCollection();
             featureCollection.Set(new OpenIddictServerAspNetCoreFeature
@@ -47,12 +36,15 @@ public class AuthorizeRequestTests : TestBase
                 {
                     Request = new OpenIddictRequest
                     {
+                        ClientId = clientId,
+                        ClientSecret = clientSecret,
+                        GrantType = GrantTypes.ClientCredentials,
                         Scope = "test",
                     },
                 },
             });
             httpContext!.Setup(x => x.Features).Returns(featureCollection);
-            var command = new AuthorizeRequest.Command();
+            var command = new Exchange.Command();
 
             // Act
             var result = await mediator.Send(command);
@@ -75,7 +67,7 @@ public class AuthorizeRequestTests : TestBase
                 Transaction = new OpenIddictServerTransaction(),
             });
             httpContext!.Setup(x => x.Features).Returns(featureCollection);
-            var command = new AuthorizeRequest.Command();
+            var command = new Exchange.Command();
 
             // Act
             var response = await mediator.Send(command);
@@ -87,7 +79,7 @@ public class AuthorizeRequestTests : TestBase
         });
 
     [Fact]
-    public async Task Should_RequireLogin_When_UserIsntAuthenticated() =>
+    public async Task Should_NotBeValid_When_GrantTypeIsNotSupported() =>
         await MediatorTest(async (mediator, services) =>
         {
             // Arrange
@@ -99,12 +91,15 @@ public class AuthorizeRequestTests : TestBase
                 {
                     Request = new OpenIddictRequest
                     {
-                        Prompt = Prompts.None,
+                        ClientId = "test",
+                        ClientSecret = "test",
+                        GrantType = GrantTypes.Implicit,
+                        Scope = "test",
                     },
                 },
             });
             httpContext!.Setup(x => x.Features).Returns(featureCollection);
-            var command = new AuthorizeRequest.Command();
+            var command = new Exchange.Command();
 
             // Act
             var response = await mediator.Send(command);
@@ -112,6 +107,6 @@ public class AuthorizeRequestTests : TestBase
             // Assert
             Assert.False(response.IsValid);
             Assert.Contains(response.Errors, error =>
-                error.ErrorCode == Errors.LoginRequired);
+                error.ErrorCode == Errors.UnsupportedGrantType);
         });
 }

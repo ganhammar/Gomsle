@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
 using OpenIddict.Abstractions;
+using OpenIddict.AmazonDynamoDB;
 using OpenIddict.Server;
 using OpenIddict.Server.AspNetCore;
 using Xunit;
@@ -28,7 +29,7 @@ public class AuthorizationControllerTests : TestBase
     };
 
     [Fact]
-    public async Task Should_RegisterUser_When_RequestIsValid() => await ControllerTest<AuthorizationController>(
+    public async Task Should_ReturnSignInResult_When_AuthorizationRequestIsValid() => await ControllerTest<AuthorizationController>(
         // Arrange
         ConfigureController,
         // Act & Assert
@@ -108,7 +109,7 @@ public class AuthorizationControllerTests : TestBase
         });
 
     [Fact]
-    public async Task Should_ReturnForbid_When_RequestIsntValid() => await ControllerTest<AuthorizationController>(
+    public async Task Should_ReturnForbid_When_AuthorizeRequestIsntValid() => await ControllerTest<AuthorizationController>(
         // Arrange
         ConfigureController,
         // Act & Assert
@@ -155,5 +156,81 @@ public class AuthorizationControllerTests : TestBase
 
             var signOutResult = result as SignOutResult;
             Assert.NotNull(signOutResult);
+        });
+
+    [Fact]
+    public async Task Should_ReturnSignInResult_When_ExchangeRequestIsValid() => await ControllerTest<AuthorizationController>(
+        // Arrange
+        ConfigureController,
+        // Act & Assert
+        async (controller, services) =>
+        {
+            // Arrange
+            var applicationManager = services.GetRequiredService<IOpenIddictApplicationManager>();
+            var clientId = Guid.NewGuid().ToString();
+            var clientSecret = Guid.NewGuid().ToString();
+            var application = new OpenIddictDynamoDbApplication
+            {
+                ClientId = clientId,
+            };
+            await applicationManager.CreateAsync(application, clientSecret);
+            var httpContext = GetMock<HttpContext>();
+            var featureCollection = new FeatureCollection();
+            featureCollection.Set(new OpenIddictServerAspNetCoreFeature
+            {
+                Transaction = new OpenIddictServerTransaction
+                {
+                    Request = new OpenIddictRequest
+                    {
+                        ClientId = clientId,
+                        ClientSecret = clientSecret,
+                        GrantType = GrantTypes.ClientCredentials,
+                        Scope = "test",
+                    },
+                },
+            });
+            httpContext!.Setup(x => x.Features).Returns(featureCollection);
+
+            // Act
+            var result = await controller.Exchange(new());
+
+            // Assert
+            Assert.NotNull(result);
+
+            var signInResult = result as SignInResult;
+            Assert.NotNull(signInResult);
+        });
+
+    [Fact]
+    public async Task Should_ReturnForbid_When_ExchangeRequestIsntValid() => await ControllerTest<AuthorizationController>(
+        // Arrange
+        ConfigureController,
+        // Act & Assert
+        async (controller, services) =>
+        {
+            // Arrange
+            var mediator = services.GetRequiredService<IMediator>();
+            var httpContext = GetMock<HttpContext>();
+            var featureCollection = new FeatureCollection();
+            featureCollection.Set(new OpenIddictServerAspNetCoreFeature
+            {
+                Transaction = new OpenIddictServerTransaction
+                {
+                    Request = new OpenIddictRequest
+                    {
+                        Prompt = Prompts.None,
+                    },
+                },
+            });
+            httpContext!.Setup(x => x.Features).Returns(featureCollection);
+
+            // Act
+            var result = await controller.Exchange(new());
+
+            // Assert
+            Assert.NotNull(result);
+
+            var forbidResult = result as ForbidResult;
+            Assert.NotNull(forbidResult);
         });
 }

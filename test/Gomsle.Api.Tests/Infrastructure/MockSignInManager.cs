@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using static OpenIddict.Abstractions.OpenIddictConstants;
 
 namespace Gomsle.Api.Tests.Infrastructure;
 
@@ -77,10 +78,9 @@ public class MockSignInManager : SignInManager<DynamoDbUser>
     {
         return new ClaimsPrincipal(new ClaimsIdentity(new List<Claim>
         {
-            new Claim(ClaimTypes.Email, user.Email),
-            new Claim(ClaimTypes.Name, user.Id),
-            new Claim(ClaimTypes.NameIdentifier, user.Id),
-            new Claim(TestBase.UserIdClaimType, user.Id),
+            new Claim(Claims.Email, user.Email),
+            new Claim(Claims.Name, user.UserName),
+            new Claim(Claims.Subject, user.Id),
         }, "TestAuth"));
     }
 

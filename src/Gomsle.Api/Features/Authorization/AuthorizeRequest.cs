@@ -85,7 +85,7 @@ public class AuthorizeRequest
                 claim.SetDestinations(GetDestinations(claim, principal));
             }
 
-            return Response<ClaimsPrincipal>(principal);
+            return Response(principal);
         }
 
         private IEnumerable<string> GetDestinations(Claim claim, ClaimsPrincipal principal)
