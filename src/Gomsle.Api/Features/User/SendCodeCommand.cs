@@ -1,19 +1,17 @@
 using AspNetCore.Identity.AmazonDynamoDB;
 using FluentValidation;
+using Gomsle.Api.Features.Email;
 using Gomsle.Api.Infrastructure;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
 
-namespace Gomsle.Api.Features.Account;
+namespace Gomsle.Api.Features.User;
 
-public class VerifyCode
+public class SendCodeCommand
 {
-    public class Command : IRequest<IResponse<SignInResult>>
+    public class Command : IRequest<IResponse>
     {
         public string? Provider { get; set; }
-        public string? Code { get; set; }
-        public bool RememberBrowser { get; set; }
-        public bool RememberMe { get; set; }
     }
 
     public class CommandValidator : AbstractValidator<Command>
@@ -48,33 +46,41 @@ public class VerifyCode
                 })
                 .WithErrorCode("TwoFactorProviderNotValid")
                 .WithMessage("The selected two factor provider is not valid in the current context");
-
-            RuleFor(x => x.Code)
-                .NotEmpty();
         }
     }
 
-    public class CommandHandler : Handler<Command, IResponse<SignInResult>>
+    public class CommandHandler : Handler<Command, IResponse>
     {
         private readonly UserManager<DynamoDbUser> _userManager;
         private readonly SignInManager<DynamoDbUser> _signInManager;
+        private readonly IEmailSender _emailSender;
 
         public CommandHandler(
             UserManager<DynamoDbUser> userManager,
-            SignInManager<DynamoDbUser> signInManager)
+            SignInManager<DynamoDbUser> signInManager,
+            IEmailSender emailSender)
         {
             _userManager = userManager;
             _signInManager = signInManager;
+            _emailSender = emailSender;
         }
 
-        public override async Task<IResponse<SignInResult>> Handle(
+        public override async Task<IResponse> Handle(
             Command request, CancellationToken cancellationToken)
         {
             var user = await _signInManager.GetTwoFactorAuthenticationUserAsync();
-            var result = await _signInManager
-                .TwoFactorSignInAsync(request.Provider, request.Code, request.RememberMe, request.RememberBrowser);
+            var code = await _userManager.GenerateTwoFactorTokenAsync(user, request.Provider);
 
-            return Response(result);
+            var message = $"Your security code is: {code}";
+
+            switch(request.Provider)
+            {
+                case "Email":
+                    await _emailSender.Send(await _userManager.GetEmailAsync(user), "Security Code - Gömsle", message);
+                    break;
+            }
+
+            return Response();
         }
     }
 }

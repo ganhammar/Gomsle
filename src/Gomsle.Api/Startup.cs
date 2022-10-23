@@ -48,7 +48,7 @@ public class Startup
             {
                 builder
                     .SetAuthorizationEndpointUris("/connect/authorize")
-                    .SetLogoutEndpointUris("/connect/logout")
+                    .SetLogoutEndpointUris("/connect/LogoutCommand")
                     .SetIntrospectionEndpointUris("/connect/introspect")
                     .SetUserinfoEndpointUris("/connect/userinfo")
                     .SetTokenEndpointUris("/connect/token");

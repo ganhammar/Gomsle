@@ -1,6 +1,6 @@
 using AspNetCore.Identity.AmazonDynamoDB;
 using FluentValidation.Results;
-using Gomsle.Api.Features.Account;
+using Gomsle.Api.Features.User;
 using Gomsle.Api.Features.Email;
 using Gomsle.Api.Tests.Infrastructure;
 using MediatR;
@@ -10,10 +10,10 @@ using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using Xunit;
 
-namespace Gomsle.Api.Tests.Features.Account;
+namespace Gomsle.Api.Tests.Features.User;
 
 [Collection("Sequential")]
-public class AccountControllerTests : TestBase
+public class UserControllerTests : TestBase
 {
     private Func<IServiceProvider, object[]> ConfigureController = (services) =>
     {
@@ -23,7 +23,7 @@ public class AccountControllerTests : TestBase
     };
 
     [Fact]
-    public async Task Should_RegisterUser_When_RequestIsValid() => await ControllerTest<AccountController>(
+    public async Task Should_RegisterUser_When_RequestIsValid() => await ControllerTest<UserController>(
         // Arrange
         ConfigureController,
         // Act & Assert
@@ -55,7 +55,7 @@ public class AccountControllerTests : TestBase
         });
 
     [Fact]
-    public async Task Should_SendEmail_When_Registering() => await ControllerTest<AccountController>(
+    public async Task Should_SendEmail_When_Registering() => await ControllerTest<UserController>(
         // Arrange
         ConfigureController,
         // Act & Assert
@@ -78,7 +78,7 @@ public class AccountControllerTests : TestBase
         });
 
     [Fact]
-    public async Task Should_ReturnBadRequest_When_UserAlreadyExists() => await ControllerTest<AccountController>(
+    public async Task Should_ReturnBadRequest_When_UserAlreadyExists() => await ControllerTest<UserController>(
         // Arrange
         ConfigureController,
         // Act & Assert
@@ -113,7 +113,7 @@ public class AccountControllerTests : TestBase
         });
 
     [Fact]
-    public async Task Should_ReturnBadRequest_When_EmailIsNotSet() => await ControllerTest<AccountController>(
+    public async Task Should_ReturnBadRequest_When_EmailIsNotSet() => await ControllerTest<UserController>(
         // Arrange
         ConfigureController,
         // Act & Assert
@@ -140,7 +140,7 @@ public class AccountControllerTests : TestBase
         });
 
     [Fact]
-    public async Task Should_ConfirmAccount_When_RequestIsValid() => await ControllerTest<AccountController>(
+    public async Task Should_ConfirmAccountCommand_When_RequestIsValid() => await ControllerTest<UserController>(
         // Arrange
         ConfigureController,
         // Act & Assert
@@ -176,7 +176,7 @@ public class AccountControllerTests : TestBase
         });
 
     [Fact]
-    public async Task Should_ReturnForbidden_When_ConfirmRequestIsInvalid() => await ControllerTest<AccountController>(
+    public async Task Should_ReturnForbidden_When_ConfirmRequestIsInvalid() => await ControllerTest<UserController>(
         // Arrange
         ConfigureController,
         // Act & Assert
@@ -194,7 +194,7 @@ public class AccountControllerTests : TestBase
         });
 
     [Fact]
-    public async Task Should_SendResetEmail_When_ForgotRequestIsValid() => await ControllerTest<AccountController>(
+    public async Task Should_SendResetEmail_When_ForgotRequestIsValid() => await ControllerTest<UserController>(
         // Arrange
         ConfigureController,
         // Act & Assert
@@ -210,7 +210,7 @@ public class AccountControllerTests : TestBase
                 EmailConfirmed = false,
             };
             await userManager.CreateAsync(user);
-            var command = new ForgotPassword.Command
+            var command = new ForgotPasswordCommand.Command
             {
                 Email = email,
                 ResetUrl = "https://gomsle.com/reset",
@@ -230,7 +230,7 @@ public class AccountControllerTests : TestBase
         });
 
     [Fact]
-    public async Task Should_ResetPassword_When_RequestIsValid() => await ControllerTest<AccountController>(
+    public async Task Should_ResetPasswordCommand_When_RequestIsValid() => await ControllerTest<UserController>(
         // Arrange
         ConfigureController,
         // Act & Assert
@@ -267,7 +267,7 @@ public class AccountControllerTests : TestBase
         });
 
     [Fact]
-    public async Task Should_ReturnForbidden_When_ResetRequestIsInvalid() => await ControllerTest<AccountController>(
+    public async Task Should_ReturnForbidden_When_ResetRequestIsInvalid() => await ControllerTest<UserController>(
         // Arrange
         ConfigureController,
         // Act & Assert
@@ -285,7 +285,7 @@ public class AccountControllerTests : TestBase
         });
 
     [Fact]
-    public async Task Should_LoginUser_When_RequestIsValid() => await ControllerTest<AccountController>(
+    public async Task Should_LoginUser_When_RequestIsValid() => await ControllerTest<UserController>(
         // Arrange
         ConfigureController,
         // Act & Assert
@@ -321,7 +321,7 @@ public class AccountControllerTests : TestBase
         });
 
     [Fact]
-    public async Task Should_ReturnListOfTwoFactorProviders_When_LoginIsInProgress() => await ControllerTest<AccountController>(
+    public async Task Should_ReturnListOfTwoFactorProviders_When_LoginIsInProgress() => await ControllerTest<UserController>(
         // Arrange
         ConfigureController,
         // Act & Assert
@@ -345,7 +345,7 @@ public class AccountControllerTests : TestBase
             });
 
             // Act
-            var result = await controller.GetTwoFactorProviders(new());
+            var result = await controller.GetTwoFactorProvidersQuery(new());
 
             // Assert
             Assert.NotNull(result);
@@ -359,14 +359,14 @@ public class AccountControllerTests : TestBase
         });
 
     [Fact]
-    public async Task Should_ReturnBadRequest_When_GettingListOfTwoFactorProvidersAndNoLoginIsInProgress() => await ControllerTest<AccountController>(
+    public async Task Should_ReturnBadRequest_When_GettingListOfTwoFactorProvidersAndNoLoginIsInProgress() => await ControllerTest<UserController>(
         // Arrange
         ConfigureController,
         // Act & Assert
         async (controller, services) =>
         {
             // Act
-            var result = await controller.GetTwoFactorProviders(new());
+            var result = await controller.GetTwoFactorProvidersQuery(new());
 
             // Assert
             Assert.NotNull(result);
@@ -376,7 +376,7 @@ public class AccountControllerTests : TestBase
         });
 
     [Fact]
-    public async Task Should_RetunNoContent_When_SendingCodeAndLoginIsInProgress() => await ControllerTest<AccountController>(
+    public async Task Should_RetunNoContent_When_SendingCodeAndLoginIsInProgress() => await ControllerTest<UserController>(
         // Arrange
         ConfigureController,
         // Act & Assert
@@ -400,7 +400,7 @@ public class AccountControllerTests : TestBase
             });
 
             // Act
-            var result = await controller.SendCode(new()
+            var result = await controller.SendCodeCommand(new()
             {
                 Provider = "Email",
             });
@@ -413,14 +413,14 @@ public class AccountControllerTests : TestBase
         });
 
     [Fact]
-    public async Task Should_ReturnBadRequest_When_SendingCodeAndNoLoginIsInProgress() => await ControllerTest<AccountController>(
+    public async Task Should_ReturnBadRequest_When_SendingCodeAndNoLoginIsInProgress() => await ControllerTest<UserController>(
         // Arrange
         ConfigureController,
         // Act & Assert
         async (controller, services) =>
         {
             // Act
-            var result = await controller.SendCode(new()
+            var result = await controller.SendCodeCommand(new()
             {
                 Provider = "Email",
             });
@@ -433,7 +433,7 @@ public class AccountControllerTests : TestBase
         });
 
     [Fact]
-    public async Task Should_BeSuccessfull_When_VerifyingCodeThatIsCorrect() => await ControllerTest<AccountController>(
+    public async Task Should_BeSuccessfull_When_VerifyingCodeThatIsCorrect() => await ControllerTest<UserController>(
         // Arrange
         ConfigureController,
         // Act & Assert
@@ -459,7 +459,7 @@ public class AccountControllerTests : TestBase
             var code = await userManager.GenerateTwoFactorTokenAsync(user, "Email");
 
             // Act
-            var result = await controller.VerifyCode(new()
+            var result = await controller.VerifyCodeCommand(new()
             {
                 Provider = "Email",
                 Code = code,

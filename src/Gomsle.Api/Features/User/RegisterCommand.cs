@@ -6,9 +6,9 @@ using Gomsle.Api.Infrastructure;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
 
-namespace Gomsle.Api.Features.Account;
+namespace Gomsle.Api.Features.User;
 
-public class RegisterAccount
+public class RegisterCommand
 {
     public class Command : IRequest<IResponse<DynamoDbUser>>
     {

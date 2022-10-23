@@ -1,14 +1,14 @@
 using AspNetCore.Identity.AmazonDynamoDB;
-using Gomsle.Api.Features.Account;
+using Gomsle.Api.Features.User;
 using Gomsle.Api.Tests.Infrastructure;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit;
 
-namespace Gomsle.Api.Tests.Features.Account;
+namespace Gomsle.Api.Tests.Features.User;
 
 [Collection("Sequential")]
-public class VerifyCodeTests : TestBase
+public class VerifyCodeCommandTests : TestBase
 {
     [Fact]
     public async Task Should_LogUserIn_When_CommandIsValid() =>
@@ -26,14 +26,14 @@ public class VerifyCodeTests : TestBase
                 TwoFactorEnabled = true,
             };
             await userManager.CreateAsync(user, password);
-            await mediator.Send(new Login.Command
+            await mediator.Send(new LoginCommand.Command
             {
                 Email = email,
                 Password = password,
                 RememberMe = false,
             });
             var code = await userManager.GenerateTwoFactorTokenAsync(user, "Email");
-            var command = new VerifyCode.Command
+            var command = new VerifyCodeCommand.Command
             {
                 Code = code,
                 Provider = "Email",
@@ -54,11 +54,11 @@ public class VerifyCodeTests : TestBase
             // Arrange
             var userManager = services.GetRequiredService<UserManager<DynamoDbUser>>();
             var signInManager = services.GetRequiredService<SignInManager<DynamoDbUser>>();
-            var command = new VerifyCode.Command
+            var command = new VerifyCodeCommand.Command
             {
                 Code = "test",
             };
-            var validator = new VerifyCode.CommandValidator(signInManager, userManager);
+            var validator = new VerifyCodeCommand.CommandValidator(signInManager, userManager);
 
             // Act
             var response = await mediator.Send(command);
@@ -76,11 +76,11 @@ public class VerifyCodeTests : TestBase
             // Arrange
             var userManager = services.GetRequiredService<UserManager<DynamoDbUser>>();
             var signInManager = services.GetRequiredService<SignInManager<DynamoDbUser>>();
-            var command = new VerifyCode.Command
+            var command = new VerifyCodeCommand.Command
             {
                 Provider = "test",
             };
-            var validator = new VerifyCode.CommandValidator(signInManager, userManager);
+            var validator = new VerifyCodeCommand.CommandValidator(signInManager, userManager);
 
             // Act
             var response = await mediator.Send(command);
@@ -97,7 +97,7 @@ public class VerifyCodeTests : TestBase
         {
             // Arrange
             var userManager = services.GetRequiredService<UserManager<DynamoDbUser>>();
-            var command = new VerifyCode.Command
+            var command = new VerifyCodeCommand.Command
             {
                 Provider = "Email",
                 Code = "test",
@@ -128,13 +128,13 @@ public class VerifyCodeTests : TestBase
                 TwoFactorEnabled = true,
             };
             await userManager.CreateAsync(user, password);
-            await mediator.Send(new Login.Command
+            await mediator.Send(new LoginCommand.Command
             {
                 Email = email,
                 Password = password,
                 RememberMe = false,
             });
-            var command = new VerifyCode.Command
+            var command = new VerifyCodeCommand.Command
             {
                 Provider = "Phone",
                 Code = "test",

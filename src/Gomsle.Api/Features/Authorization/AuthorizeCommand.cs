@@ -10,7 +10,7 @@ using static OpenIddict.Abstractions.OpenIddictConstants;
 
 namespace Gomsle.Api.Features.Authorization;
 
-public class AuthorizeRequest
+public class AuthorizeCommand
 {
     public class Command : IRequest<IResponse<ClaimsPrincipal>>
     {

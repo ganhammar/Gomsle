@@ -4,9 +4,9 @@ using Gomsle.Api.Infrastructure;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
 
-namespace Gomsle.Api.Features.Account;
+namespace Gomsle.Api.Features.User;
 
-public class GetTwoFactorProviders
+public class GetTwoFactorProvidersQuery
 {
     public class Query : IRequest<IResponse<List<string>>>
     {

@@ -1,17 +1,17 @@
 using AspNetCore.Identity.AmazonDynamoDB;
-using Gomsle.Api.Features.Account;
+using Gomsle.Api.Features.User;
 using Gomsle.Api.Tests.Infrastructure;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit;
 
-namespace Gomsle.Api.Tests.Features.Account;
+namespace Gomsle.Api.Tests.Features.User;
 
 [Collection("Sequential")]
-public class ResetPasswordTests : TestBase
+public class ResetPasswordCommandTests : TestBase
 {
     [Fact]
-    public async Task Should_ResetPassword_When_CommandIsValid() =>
+    public async Task Should_ResetPasswordCommand_When_CommandIsValid() =>
         await MediatorTest(async (mediator, services) =>
         {
             // Arrange
@@ -23,7 +23,7 @@ public class ResetPasswordTests : TestBase
             };
             await userManager.CreateAsync(user);
             var token = await userManager.GeneratePasswordResetTokenAsync(user);
-            var command = new ResetPassword.Command
+            var command = new ResetPasswordCommand.Command
             {
                 UserId = user.Id,
                 Token = token,
@@ -39,7 +39,7 @@ public class ResetPasswordTests : TestBase
         });
 
     [Fact]
-    public async Task Should_NotResetPassword_When_TokenIsInvalid() =>
+    public async Task Should_NotResetPasswordCommand_When_TokenIsInvalid() =>
         await MediatorTest(async (mediator, services) =>
         {
             // Arrange
@@ -50,7 +50,7 @@ public class ResetPasswordTests : TestBase
                 UserName = "test",
             };
             await userManager.CreateAsync(user);
-            var command = new ResetPassword.Command
+            var command = new ResetPasswordCommand.Command
             {
                 UserId = user.Id,
                 Token = "not-the-right-stuff",
@@ -71,13 +71,13 @@ public class ResetPasswordTests : TestBase
         await MediatorTest(async (mediator, services) =>
         {
             // Arrange
-            var command = new ResetPassword.Command
+            var command = new ResetPasswordCommand.Command
             {
                 Token = "a-reset-token",
                 Password = "itsnotaseasyas123",
                 ReturnUrl = "https://gomsle.com/login",
             };
-            var validator = new ResetPassword.CommandValidator();
+            var validator = new ResetPasswordCommand.CommandValidator();
 
             // Act
             var response = await mediator.Send(command);
@@ -93,13 +93,13 @@ public class ResetPasswordTests : TestBase
         await MediatorTest(async (mediator, services) =>
         {
             // Arrange
-            var command = new ResetPassword.Command
+            var command = new ResetPasswordCommand.Command
             {
                 UserId = "a-user-id",
                 Password = "itsnotaseasyas123",
                 ReturnUrl = "https://gomsle.com/login",
             };
-            var validator = new ResetPassword.CommandValidator();
+            var validator = new ResetPasswordCommand.CommandValidator();
 
             // Act
             var response = await mediator.Send(command);
@@ -115,13 +115,13 @@ public class ResetPasswordTests : TestBase
         await MediatorTest(async (mediator, services) =>
         {
             // Arrange
-            var command = new ResetPassword.Command
+            var command = new ResetPasswordCommand.Command
             {
                 UserId = "a-user-id",
                 Token = "a-reset-token",
                 ReturnUrl = "https://gomsle.com/login",
             };
-            var validator = new ResetPassword.CommandValidator();
+            var validator = new ResetPasswordCommand.CommandValidator();
 
             // Act
             var response = await mediator.Send(command);
@@ -137,13 +137,13 @@ public class ResetPasswordTests : TestBase
         await MediatorTest(async (mediator, services) =>
         {
             // Arrange
-            var command = new ResetPassword.Command
+            var command = new ResetPasswordCommand.Command
             {
                 UserId = "a-user-id",
                 Token = "a-reset-token",
                 Password = "itsnotaseasyas123",
             };
-            var validator = new ResetPassword.CommandValidator();
+            var validator = new ResetPasswordCommand.CommandValidator();
 
             // Act
             var response = await mediator.Send(command);

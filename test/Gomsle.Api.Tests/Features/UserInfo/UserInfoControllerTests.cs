@@ -1,5 +1,5 @@
 using AspNetCore.Identity.AmazonDynamoDB;
-using Gomsle.Api.Features.Account;
+using Gomsle.Api.Features.User;
 using Gomsle.Api.Features.UserInfo;
 using Gomsle.Api.Tests.Infrastructure;
 using MediatR;
@@ -26,7 +26,7 @@ public class UserInfoControllerTests : TestBase
     };
 
     [Fact]
-    public async Task Should_ReturnOk_When_UserInfoRequestIsValid() => await ControllerTest<UserInfoController>(
+    public async Task Should_ReturnOk_When_UserInfoQueryIsValid() => await ControllerTest<UserInfoController>(
         // Arrange
         ConfigureController,
         // Act & Assert
@@ -45,7 +45,7 @@ public class UserInfoControllerTests : TestBase
                 TwoFactorEnabled = false,
             };
             await userManager.CreateAsync(user, password);
-            await mediator.Send(new Login.Command
+            await mediator.Send(new LoginCommand.Command
             {
                 Email = email,
                 Password = password,

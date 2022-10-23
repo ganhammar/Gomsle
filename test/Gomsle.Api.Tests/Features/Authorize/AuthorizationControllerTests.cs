@@ -1,5 +1,5 @@
 using AspNetCore.Identity.AmazonDynamoDB;
-using Gomsle.Api.Features.Account;
+using Gomsle.Api.Features.User;
 using Gomsle.Api.Features.Authorization;
 using Gomsle.Api.Tests.Infrastructure;
 using MediatR;
@@ -48,7 +48,7 @@ public class AuthorizationControllerTests : TestBase
                 TwoFactorEnabled = false,
             };
             await userManager.CreateAsync(user, password);
-            await mediator.Send(new Login.Command
+            await mediator.Send(new LoginCommand.Command
             {
                 Email = email,
                 Password = password,
@@ -109,7 +109,7 @@ public class AuthorizationControllerTests : TestBase
         });
 
     [Fact]
-    public async Task Should_ReturnForbid_When_AuthorizeRequestIsntValid() => await ControllerTest<AuthorizationController>(
+    public async Task Should_ReturnForbid_When_AuthorizeCommandIsntValid() => await ControllerTest<AuthorizationController>(
         // Arrange
         ConfigureController,
         // Act & Assert
@@ -149,7 +149,7 @@ public class AuthorizationControllerTests : TestBase
         async (controller, services) =>
         {
             // Act
-            var result = await controller.Logout(new());
+            var result = await controller.LogoutCommand(new());
 
             // Assert
             Assert.NotNull(result);
@@ -159,7 +159,7 @@ public class AuthorizationControllerTests : TestBase
         });
 
     [Fact]
-    public async Task Should_ReturnSignInResult_When_ExchangeRequestIsValid() => await ControllerTest<AuthorizationController>(
+    public async Task Should_ReturnSignInResult_When_ExchangeCommandRequestIsValid() => await ControllerTest<AuthorizationController>(
         // Arrange
         ConfigureController,
         // Act & Assert
@@ -192,7 +192,7 @@ public class AuthorizationControllerTests : TestBase
             httpContext!.Setup(x => x.Features).Returns(featureCollection);
 
             // Act
-            var result = await controller.Exchange(new());
+            var result = await controller.ExchangeCommand(new());
 
             // Assert
             Assert.NotNull(result);
@@ -202,7 +202,7 @@ public class AuthorizationControllerTests : TestBase
         });
 
     [Fact]
-    public async Task Should_ReturnForbid_When_ExchangeRequestIsntValid() => await ControllerTest<AuthorizationController>(
+    public async Task Should_ReturnForbid_When_ExchangeCommandRequestIsntValid() => await ControllerTest<AuthorizationController>(
         // Arrange
         ConfigureController,
         // Act & Assert
@@ -225,7 +225,7 @@ public class AuthorizationControllerTests : TestBase
             httpContext!.Setup(x => x.Features).Returns(featureCollection);
 
             // Act
-            var result = await controller.Exchange(new());
+            var result = await controller.ExchangeCommand(new());
 
             // Assert
             Assert.NotNull(result);

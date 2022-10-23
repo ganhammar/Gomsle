@@ -1,18 +1,18 @@
-using Gomsle.Api.Features.Account;
+using Gomsle.Api.Features.User;
 using Gomsle.Api.Tests.Infrastructure;
 using Xunit;
 
-namespace Gomsle.Api.Tests.Features.Account;
+namespace Gomsle.Api.Tests.Features.User;
 
 [Collection("Sequential")]
-public class RegisterAccountTests : TestBase
+public class RegisterTests : TestBase
 {
     [Fact]
     public async Task Should_RegisterUser_When_CommandIsValid() =>
         await MediatorTest(async (mediator, services) =>
         {
             // Arrange
-            var command = new RegisterAccount.Command
+            var command = new RegisterCommand.Command
             {
                 Email = "test@gomsle.com",
                 UserName = "test",

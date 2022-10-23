@@ -11,7 +11,7 @@ using ValidationFailure = FluentValidation.Results.ValidationFailure;
 
 namespace Gomsle.Api.Features.Authorization;
 
-public class Exchange
+public class ExchangeCommand
 {
     public class Command : IRequest<IResponse<ClaimsPrincipal>>
     {

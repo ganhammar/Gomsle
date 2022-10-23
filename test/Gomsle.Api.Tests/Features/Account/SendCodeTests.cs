@@ -1,5 +1,5 @@
 using AspNetCore.Identity.AmazonDynamoDB;
-using Gomsle.Api.Features.Account;
+using Gomsle.Api.Features.User;
 using Gomsle.Api.Features.Email;
 using Gomsle.Api.Tests.Infrastructure;
 using Microsoft.AspNetCore.Identity;
@@ -7,10 +7,10 @@ using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using Xunit;
 
-namespace Gomsle.Api.Tests.Features.Account;
+namespace Gomsle.Api.Tests.Features.User;
 
 [Collection("Sequential")]
-public class SendCodeTests : TestBase
+public class SendCodeCommandTests : TestBase
 {
     [Fact]
     public async Task Should_SendEmail_When_CommandIsValid() =>
@@ -28,13 +28,13 @@ public class SendCodeTests : TestBase
                 TwoFactorEnabled = true,
             };
             await userManager.CreateAsync(user, password);
-            await mediator.Send(new Login.Command
+            await mediator.Send(new LoginCommand.Command
             {
                 Email = email,
                 Password = password,
                 RememberMe = false,
             });
-            var command = new SendCode.Command
+            var command = new SendCodeCommand.Command
             {
                 Provider = "Email",
             };
@@ -67,13 +67,13 @@ public class SendCodeTests : TestBase
                 TwoFactorEnabled = true,
             };
             await userManager.CreateAsync(user, password);
-            await mediator.Send(new Login.Command
+            await mediator.Send(new LoginCommand.Command
             {
                 Email = email,
                 Password = password,
                 RememberMe = false,
             });
-            var command = new SendCode.Command();
+            var command = new SendCodeCommand.Command();
 
             // Act
             var response = await mediator.Send(command);
@@ -90,7 +90,7 @@ public class SendCodeTests : TestBase
         {
             // Arrange
             var userManager = services.GetRequiredService<UserManager<DynamoDbUser>>();
-            var command = new SendCode.Command
+            var command = new SendCodeCommand.Command
             {
                 Provider = "Email",
             };
@@ -120,13 +120,13 @@ public class SendCodeTests : TestBase
                 TwoFactorEnabled = true,
             };
             await userManager.CreateAsync(user, password);
-            await mediator.Send(new Login.Command
+            await mediator.Send(new LoginCommand.Command
             {
                 Email = email,
                 Password = password,
                 RememberMe = false,
             });
-            var command = new SendCode.Command
+            var command = new SendCodeCommand.Command
             {
                 Provider = "Phone",
             };

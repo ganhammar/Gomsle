@@ -13,7 +13,7 @@ using static OpenIddict.Abstractions.OpenIddictConstants;
 namespace Gomsle.Api.Tests.Features.Authorize;
 
 [Collection("Sequential")]
-public class ExchangeTests : TestBase
+public class ExchangeCommandTests : TestBase
 {
     [Fact]
     public async Task Should_ReturnPrincipal_When_RequestIsValid() =>
@@ -44,7 +44,7 @@ public class ExchangeTests : TestBase
                 },
             });
             httpContext!.Setup(x => x.Features).Returns(featureCollection);
-            var command = new Exchange.Command();
+            var command = new ExchangeCommand.Command();
 
             // Act
             var result = await mediator.Send(command);
@@ -67,7 +67,7 @@ public class ExchangeTests : TestBase
                 Transaction = new OpenIddictServerTransaction(),
             });
             httpContext!.Setup(x => x.Features).Returns(featureCollection);
-            var command = new Exchange.Command();
+            var command = new ExchangeCommand.Command();
 
             // Act
             var response = await mediator.Send(command);
@@ -99,7 +99,7 @@ public class ExchangeTests : TestBase
                 },
             });
             httpContext!.Setup(x => x.Features).Returns(featureCollection);
-            var command = new Exchange.Command();
+            var command = new ExchangeCommand.Command();
 
             // Act
             var response = await mediator.Send(command);

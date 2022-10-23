@@ -1,5 +1,5 @@
 using AspNetCore.Identity.AmazonDynamoDB;
-using Gomsle.Api.Features.Account;
+using Gomsle.Api.Features.User;
 using Gomsle.Api.Features.Email;
 using Gomsle.Api.Tests.Infrastructure;
 using Microsoft.AspNetCore.Identity;
@@ -7,10 +7,10 @@ using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using Xunit;
 
-namespace Gomsle.Api.Tests.Features.Account;
+namespace Gomsle.Api.Tests.Features.User;
 
 [Collection("Sequential")]
-public class ForgotPasswordTests : TestBase
+public class ForgotPasswordCommandTests : TestBase
 {
     [Fact]
     public async Task Should_SendResetEmail_When_CommandIsValid() =>
@@ -25,7 +25,7 @@ public class ForgotPasswordTests : TestBase
                 UserName = email,
             };
             await userManager.CreateAsync(user);
-            var command = new ForgotPassword.Command
+            var command = new ForgotPasswordCommand.Command
             {
                 Email = email,
                 ResetUrl = "https://gomsle.com/reset",
@@ -50,7 +50,7 @@ public class ForgotPasswordTests : TestBase
             // Arrange
             var userManager = services.GetRequiredService<UserManager<DynamoDbUser>>();
             var email = "test@gomsle.com";
-            var command = new ForgotPassword.Command
+            var command = new ForgotPasswordCommand.Command
             {
                 Email = email,
                 ResetUrl = "https://gomsle.com/reset",
@@ -73,11 +73,11 @@ public class ForgotPasswordTests : TestBase
         await MediatorTest(async (mediator, services) =>
         {
             // Arrange
-            var command = new ForgotPassword.Command
+            var command = new ForgotPasswordCommand.Command
             {
                 ResetUrl = "https://gomsle.com/reset",
             };
-            var validator = new ForgotPassword.CommandValidator();
+            var validator = new ForgotPasswordCommand.CommandValidator();
 
             // Act
             var response = await validator.ValidateAsync(command);
@@ -93,11 +93,11 @@ public class ForgotPasswordTests : TestBase
         await MediatorTest(async (mediator, services) =>
         {
             // Arrange
-            var command = new ForgotPassword.Command
+            var command = new ForgotPasswordCommand.Command
             {
                 Email = "test@gomsle.com",
             };
-            var validator = new ForgotPassword.CommandValidator();
+            var validator = new ForgotPasswordCommand.CommandValidator();
 
             // Act
             var response = await validator.ValidateAsync(command);
@@ -113,12 +113,12 @@ public class ForgotPasswordTests : TestBase
         await MediatorTest(async (mediator, services) =>
         {
             // Arrange
-            var command = new ForgotPassword.Command
+            var command = new ForgotPasswordCommand.Command
             {
                 Email = "not-a-email",
                 ResetUrl = "https://gomsle.com/reset",
             };
-            var validator = new ForgotPassword.CommandValidator();
+            var validator = new ForgotPasswordCommand.CommandValidator();
 
             // Act
             var response = await validator.ValidateAsync(command);

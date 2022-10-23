@@ -8,7 +8,7 @@ using static OpenIddict.Abstractions.OpenIddictConstants;
 
 namespace Gomsle.Api.Features.UserInfo;
 
-public class UserInfoRequest
+public class UserInfoQuery
 {
     public class Query : IRequest<IResponse<Dictionary<string, object>>>
     {

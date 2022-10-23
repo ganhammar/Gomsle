@@ -16,7 +16,7 @@ public class AuthorizationController : ApiControllerBase
     }
 
     [HttpGet("~/connect/authorize")]
-    public async Task<IActionResult> Authorize(AuthorizeRequest.Command command)
+    public async Task<IActionResult> Authorize(AuthorizeCommand.Command command)
     {
         var result = await _mediator.Send(command);
 
@@ -37,8 +37,8 @@ public class AuthorizationController : ApiControllerBase
             OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
     }
 
-    [HttpGet("~/connect/logout")]
-    public async Task<IActionResult> Logout(Logout.Command command)
+    [HttpGet("~/connect/LogoutCommand")]
+    public async Task<IActionResult> LogoutCommand(LogoutCommand.Command command)
     {
         await _mediator.Send(command);
 
@@ -47,7 +47,7 @@ public class AuthorizationController : ApiControllerBase
 
     [HttpPost("~/connect/token")]
     [Produces("application/json")]
-    public async Task<IActionResult> Exchange(Exchange.Command command)
+    public async Task<IActionResult> ExchangeCommand(ExchangeCommand.Command command)
     {
         var result = await _mediator.Send(command);
 

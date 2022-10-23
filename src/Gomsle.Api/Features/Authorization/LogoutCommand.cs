@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Identity;
 
 namespace Gomsle.Api.Features.Authorization;
 
-public class Logout
+public class LogoutCommand
 {
     public class Command : IRequest<IResponse>
     {

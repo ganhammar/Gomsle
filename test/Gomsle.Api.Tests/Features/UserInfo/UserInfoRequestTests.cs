@@ -1,5 +1,5 @@
 using AspNetCore.Identity.AmazonDynamoDB;
-using Gomsle.Api.Features.Account;
+using Gomsle.Api.Features.User;
 using Gomsle.Api.Features.UserInfo;
 using Gomsle.Api.Tests.Infrastructure;
 using Microsoft.AspNetCore.Http;
@@ -15,7 +15,7 @@ using static OpenIddict.Abstractions.OpenIddictConstants;
 namespace Gomsle.Api.Tests.Features.UserInfo;
 
 [Collection("Sequential")]
-public class UserInfoRequestTests : TestBase
+public class UserInfoQueryTests : TestBase
 {
     [Fact]
     public async Task Should_ReturnPrincipal_When_UserIsAuthenticated() =>
@@ -36,7 +36,7 @@ public class UserInfoRequestTests : TestBase
                 PhoneNumberConfirmed = true,
             };
             await userManager.CreateAsync(user, password);
-            await mediator.Send(new Login.Command
+            await mediator.Send(new LoginCommand.Command
             {
                 Email = email,
                 Password = password,
@@ -55,7 +55,7 @@ public class UserInfoRequestTests : TestBase
                 },
             });
             httpContext!.Setup(x => x.Features).Returns(featureCollection);
-            var command = new UserInfoRequest.Query();
+            var command = new UserInfoQuery.Query();
 
             // Act
             var result = await mediator.Send(command);
@@ -86,7 +86,7 @@ public class UserInfoRequestTests : TestBase
                 },
             });
             httpContext!.Setup(x => x.Features).Returns(featureCollection);
-            var command = new UserInfoRequest.Query();
+            var command = new UserInfoQuery.Query();
 
             // Act
             var response = await mediator.Send(command);

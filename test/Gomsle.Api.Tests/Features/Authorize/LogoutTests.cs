@@ -5,14 +5,14 @@ using Xunit;
 namespace Gomsle.Api.Tests.Features.Authorize;
 
 [Collection("Sequential")]
-public class LogoutTests : TestBase
+public class LogoutCommandTests : TestBase
 {
     [Fact]
     public async Task Should_BeSuccessful_When_LoggingOut() =>
         await MediatorTest(async (mediator, services) =>
         {
             // Arrange
-            var command = new Logout.Command();
+            var command = new LogoutCommand.Command();
 
             // Act
             var result = await mediator.Send(command);

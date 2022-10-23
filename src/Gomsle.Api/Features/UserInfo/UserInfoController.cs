@@ -20,7 +20,7 @@ public class UserInfoController : ApiControllerBase
     [HttpGet("~/connect/userinfo")]
     [HttpPost("~/connect/userinfo")]
     [Produces("application/json")]
-    public async Task<IActionResult> UserInfo(UserInfoRequest.Query query)
+    public async Task<IActionResult> UserInfo(UserInfoQuery.Query query)
     {
         var result = await _mediator.Send(query);
 

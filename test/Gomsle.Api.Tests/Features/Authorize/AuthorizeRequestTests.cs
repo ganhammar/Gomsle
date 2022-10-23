@@ -1,5 +1,5 @@
 using AspNetCore.Identity.AmazonDynamoDB;
-using Gomsle.Api.Features.Account;
+using Gomsle.Api.Features.User;
 using Gomsle.Api.Features.Authorization;
 using Gomsle.Api.Tests.Infrastructure;
 using Microsoft.AspNetCore.Http;
@@ -15,7 +15,7 @@ using static OpenIddict.Abstractions.OpenIddictConstants;
 namespace Gomsle.Api.Tests.Features.Authorize;
 
 [Collection("Sequential")]
-public class AuthorizeRequestTests : TestBase
+public class AuthorizeCommandTests : TestBase
 {
     [Fact]
     public async Task Should_ReturnPrincipal_When_UserIsAuthenticated() =>
@@ -33,7 +33,7 @@ public class AuthorizeRequestTests : TestBase
                 TwoFactorEnabled = false,
             };
             await userManager.CreateAsync(user, password);
-            await mediator.Send(new Login.Command
+            await mediator.Send(new LoginCommand.Command
             {
                 Email = email,
                 Password = password,
@@ -52,7 +52,7 @@ public class AuthorizeRequestTests : TestBase
                 },
             });
             httpContext!.Setup(x => x.Features).Returns(featureCollection);
-            var command = new AuthorizeRequest.Command();
+            var command = new AuthorizeCommand.Command();
 
             // Act
             var result = await mediator.Send(command);
@@ -75,7 +75,7 @@ public class AuthorizeRequestTests : TestBase
                 Transaction = new OpenIddictServerTransaction(),
             });
             httpContext!.Setup(x => x.Features).Returns(featureCollection);
-            var command = new AuthorizeRequest.Command();
+            var command = new AuthorizeCommand.Command();
 
             // Act
             var response = await mediator.Send(command);
@@ -104,7 +104,7 @@ public class AuthorizeRequestTests : TestBase
                 },
             });
             httpContext!.Setup(x => x.Features).Returns(featureCollection);
-            var command = new AuthorizeRequest.Command();
+            var command = new AuthorizeCommand.Command();
 
             // Act
             var response = await mediator.Send(command);

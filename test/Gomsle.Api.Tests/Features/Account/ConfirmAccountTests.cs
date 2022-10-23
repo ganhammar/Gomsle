@@ -1,17 +1,17 @@
 using AspNetCore.Identity.AmazonDynamoDB;
-using Gomsle.Api.Features.Account;
+using Gomsle.Api.Features.User;
 using Gomsle.Api.Tests.Infrastructure;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit;
 
-namespace Gomsle.Api.Tests.Features.Account;
+namespace Gomsle.Api.Tests.Features.User;
 
 [Collection("Sequential")]
-public class ConfirmAccountTests : TestBase
+public class ConfirmAccountCommandTests : TestBase
 {
     [Fact]
-    public async Task Should_ConfirmAccount_When_CommandIsValid() =>
+    public async Task Should_ConfirmAccountCommand_When_CommandIsValid() =>
         await MediatorTest(async (mediator, services) =>
         {
             // Arrange
@@ -24,7 +24,7 @@ public class ConfirmAccountTests : TestBase
             };
             await userManager.CreateAsync(user);
             var token = await userManager.GenerateEmailConfirmationTokenAsync(user);
-            var command = new ConfirmAccount.Command
+            var command = new ConfirmAccountCommand.Command
             {
                 UserId = user.Id,
                 Token = token,
@@ -52,12 +52,12 @@ public class ConfirmAccountTests : TestBase
             };
             await userManager.CreateAsync(user);
             var token = await userManager.GenerateEmailConfirmationTokenAsync(user);
-            var command = new ConfirmAccount.Command
+            var command = new ConfirmAccountCommand.Command
             {
                 Token = token,
                 ReturnUrl = "https://gomsle.com",
             };
-            var validator = new ConfirmAccount.CommandValidator(userManager);
+            var validator = new ConfirmAccountCommand.CommandValidator(userManager);
 
             // Act
             var response = await validator.ValidateAsync(command);
@@ -82,13 +82,13 @@ public class ConfirmAccountTests : TestBase
             };
             await userManager.CreateAsync(user);
             var token = await userManager.GenerateEmailConfirmationTokenAsync(user);
-            var command = new ConfirmAccount.Command
+            var command = new ConfirmAccountCommand.Command
             {
                 UserId = Guid.NewGuid().ToString(),
                 Token = token,
                 ReturnUrl = "https://gomsle.com",
             };
-            var validator = new ConfirmAccount.CommandValidator(userManager);
+            var validator = new ConfirmAccountCommand.CommandValidator(userManager);
 
             // Act
             var response = await validator.ValidateAsync(command);
@@ -111,12 +111,12 @@ public class ConfirmAccountTests : TestBase
                 UserName = "test@gomsle.com",
             };
             await userManager.CreateAsync(user);
-            var command = new ConfirmAccount.Command
+            var command = new ConfirmAccountCommand.Command
             {
                 UserId = user.Id,
                 ReturnUrl = "https://gomsle.com",
             };
-            var validator = new ConfirmAccount.CommandValidator(userManager);
+            var validator = new ConfirmAccountCommand.CommandValidator(userManager);
 
             // Act
             var response = await validator.ValidateAsync(command);
@@ -139,12 +139,12 @@ public class ConfirmAccountTests : TestBase
                 UserName = "test@gomsle.com",
             };
             await userManager.CreateAsync(user);
-            var command = new ConfirmAccount.Command
+            var command = new ConfirmAccountCommand.Command
             {
                 UserId = user.Id,
                 Token = "a-confirm-token",
             };
-            var validator = new ConfirmAccount.CommandValidator(userManager);
+            var validator = new ConfirmAccountCommand.CommandValidator(userManager);
 
             // Act
             var response = await validator.ValidateAsync(command);
@@ -168,7 +168,7 @@ public class ConfirmAccountTests : TestBase
                 EmailConfirmed = false,
             };
             await userManager.CreateAsync(user);
-            var command = new ConfirmAccount.Command
+            var command = new ConfirmAccountCommand.Command
             {
                 UserId = user.Id,
                 Token = Guid.NewGuid().ToString(),

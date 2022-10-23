@@ -5,9 +5,9 @@ using Gomsle.Api.Infrastructure;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
 
-namespace Gomsle.Api.Features.Account;
+namespace Gomsle.Api.Features.User;
 
-public class ForgotPassword
+public class ForgotPasswordCommand
 {
     public class Command : IRequest<IResponse>
     {
