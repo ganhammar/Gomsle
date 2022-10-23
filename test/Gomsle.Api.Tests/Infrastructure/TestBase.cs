@@ -95,7 +95,8 @@ public abstract class TestBase
 
             AspNetCoreIdentityDynamoDbSetup.EnsureInitialized(serviceProvider);
             OpenIddictDynamoDbSetup.EnsureInitialized(serviceProvider);
-            
+            DynamoDbSetup.EnsureInitialized(serviceProvider);
+
             var mediator = serviceProvider.GetRequiredService<IMediator>();
 
             try
@@ -120,6 +121,7 @@ public abstract class TestBase
 
             AspNetCoreIdentityDynamoDbSetup.EnsureInitialized(serviceProvider);
             OpenIddictDynamoDbSetup.EnsureInitialized(serviceProvider);
+            DynamoDbSetup.EnsureInitialized(serviceProvider);
 
             var httpContext = GetMock<HttpContext>();
             var controllerContext = new ControllerContext

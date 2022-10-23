@@ -1,11 +1,9 @@
 using Amazon.DynamoDBv2;
-using AspNetCore.Identity.AmazonDynamoDB;
 using Gomsle.Api.Features.Email;
 using Gomsle.Api.Infrastructure;
 using MediatR;
 using Microsoft.AspNetCore.CookiePolicy;
 using Microsoft.IdentityModel.Logging;
-using OpenIddict.AmazonDynamoDB;
 using static OpenIddict.Abstractions.OpenIddictConstants;
 
 namespace Gomsle.Api;
@@ -117,8 +115,7 @@ public class Startup
 
     public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
     {
-        AspNetCoreIdentityDynamoDbSetup.EnsureInitialized(app.ApplicationServices);
-        OpenIddictDynamoDbSetup.EnsureInitialized(app.ApplicationServices);
+        DynamoDbSetup.EnsureInitialized(app.ApplicationServices);
 
         app.UseForwardedHeaders();
 
