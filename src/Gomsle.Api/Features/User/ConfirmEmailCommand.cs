@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Identity;
 
 namespace Gomsle.Api.Features.User;
 
-public class ConfirmAccountCommand
+public class ConfirmEmailCommand
 {
     public class Command : IRequest<IResponse>
     {

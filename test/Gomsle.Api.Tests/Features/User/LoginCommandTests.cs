@@ -8,7 +8,7 @@ using Xunit;
 namespace Gomsle.Api.Tests.Features.User;
 
 [Collection("Sequential")]
-public class LoginTests : TestBase
+public class LoginCommandTests : TestBase
 {
     [Fact]
     public async Task Should_LoginUser_When_CommandIsValid() =>

@@ -5,7 +5,7 @@ using Xunit;
 namespace Gomsle.Api.Tests.Features.User;
 
 [Collection("Sequential")]
-public class RegisterTests : TestBase
+public class RegisterCommandTests : TestBase
 {
     [Fact]
     public async Task Should_RegisterUser_When_CommandIsValid() =>

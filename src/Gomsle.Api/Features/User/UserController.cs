@@ -21,7 +21,7 @@ public class UserController : ApiControllerBase
 
     [HttpGet]
     [AllowAnonymous]
-    public async Task<IActionResult> Confirm(ConfirmAccountCommand.Command command)
+    public async Task<IActionResult> ConfirmEmail(ConfirmEmailCommand.Command command)
     {
         var result = await _mediator.Send(command);
 

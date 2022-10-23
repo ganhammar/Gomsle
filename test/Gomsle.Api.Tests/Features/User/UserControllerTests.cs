@@ -140,7 +140,7 @@ public class UserControllerTests : TestBase
         });
 
     [Fact]
-    public async Task Should_ConfirmAccountCommand_When_RequestIsValid() => await ControllerTest<UserController>(
+    public async Task Should_ConfirmEmailCommand_When_RequestIsValid() => await ControllerTest<UserController>(
         // Arrange
         ConfigureController,
         // Act & Assert
@@ -159,7 +159,7 @@ public class UserControllerTests : TestBase
             var url = "https://gomsle.com/my-client-app";
 
             // Act
-            var result = await controller.Confirm(new()
+            var result = await controller.ConfirmEmail(new()
             {
                 ReturnUrl = url,
                 Token = token,
@@ -183,7 +183,7 @@ public class UserControllerTests : TestBase
         async (controller, services) =>
         {
             // Act
-            var result = await controller.Confirm(new());
+            var result = await controller.ConfirmEmail(new());
 
             // Assert
             Assert.NotNull(result);
