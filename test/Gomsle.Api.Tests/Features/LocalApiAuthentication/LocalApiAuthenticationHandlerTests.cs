@@ -9,6 +9,7 @@ using Xunit;
 
 namespace Gomsle.Api.Tests.Features.LocalApiAuthentication;
 
+[Collection("Sequential")]
 public class LocalApiAuthenticationHandlerTests
 {
     [Fact]
