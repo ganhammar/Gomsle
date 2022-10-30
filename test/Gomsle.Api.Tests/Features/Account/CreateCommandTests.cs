@@ -16,6 +16,7 @@ public class CreateCommandTests : TestBase
         await MediatorTest(async (mediator, services) =>
         {
             // Arrange
+            var user = await CreateAndLoginValidUser(services);
             var command = new CreateCommand.Command
             {
                 Name = "Microsoft",
@@ -27,6 +28,27 @@ public class CreateCommandTests : TestBase
             // Assert
             Assert.True(response.IsValid);
             Assert.Equal(command.Name.UrlFriendly(), response.Result!.NormalizedName);
+            Assert.Contains(response.Result.Members, x => x.Key == user.Id);
+        });
+
+    [Fact]
+    public async Task Should_NotBeValid_When_UserIsntAuthenticated() =>
+        await MediatorTest(async (mediator, services) =>
+        {
+            // Arrange
+            var command = new CreateCommand.Command
+            {
+                Name = "Microsoft",
+            };
+
+            // Act
+            var response = await mediator.Send(command);
+
+            // Assert
+            Assert.False(response.IsValid);
+            Assert.Contains(
+                response.Errors,
+                (error) => error.ErrorCode == "NotAuthorized");
         });
 
     [Fact]
@@ -34,6 +56,7 @@ public class CreateCommandTests : TestBase
         await MediatorTest(async (mediator, services) =>
         {
             // Arrange
+            await CreateAndLoginValidUser(services);
             var command = new CreateCommand.Command
             {
                 Name = default!,
@@ -54,6 +77,7 @@ public class CreateCommandTests : TestBase
         await MediatorTest(async (mediator, services) =>
         {
             // Arrange
+            await CreateAndLoginValidUser(services);
             var database = services.GetRequiredService<IAmazonDynamoDB>();
             var context = new DynamoDBContext(database);
             var name = "Microsoft";

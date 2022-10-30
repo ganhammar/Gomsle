@@ -1,11 +1,8 @@
-using AspNetCore.Identity.AmazonDynamoDB;
-using Gomsle.Api.Features.User;
 using Gomsle.Api.Features.Authorization;
 using Gomsle.Api.Tests.Infrastructure;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Features;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
 using OpenIddict.Abstractions;
@@ -36,37 +33,7 @@ public class AuthorizationControllerTests : TestBase
         async (controller, services) =>
         {
             // Arrange
-            var mediator = services.GetRequiredService<IMediator>();
-            var userManager = services.GetRequiredService<UserManager<DynamoDbUser>>();
-            var email = "valid@gomsle.com";
-            var password = "itsaseasyas123";
-            var user = new DynamoDbUser
-            {
-                Email = email,
-                UserName = email,
-                EmailConfirmed = true,
-                TwoFactorEnabled = false,
-            };
-            await userManager.CreateAsync(user, password);
-            await mediator.Send(new LoginCommand.Command
-            {
-                Email = email,
-                Password = password,
-                RememberMe = false,
-            });
-            var httpContext = GetMock<HttpContext>();
-            var featureCollection = new FeatureCollection();
-            featureCollection.Set(new OpenIddictServerAspNetCoreFeature
-            {
-                Transaction = new OpenIddictServerTransaction
-                {
-                    Request = new OpenIddictRequest
-                    {
-                        Scope = "test",
-                    },
-                },
-            });
-            httpContext!.Setup(x => x.Features).Returns(featureCollection);
+            await CreateAndLoginValidUser(services);
 
             // Act
             var result = await controller.Authorize(new());

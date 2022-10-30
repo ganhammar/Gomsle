@@ -25,6 +25,7 @@ public class AccountControllerTests : TestBase
         async (controller, services) =>
         {
             // Act
+            await CreateAndLoginValidUser(services);
             var result = await controller.Create(new()
             {
                 Name = "Microsoft",

@@ -12,23 +12,25 @@ namespace Gomsle.Api.Tests.Features.LocalApiAuthentication;
 [Collection("Sequential")]
 public class LocalApiAuthenticationHandlerTests
 {
+    public IHost GetHost(IAmazonDynamoDB database) => new HostBuilder()
+        .ConfigureWebHost(webBuilder =>
+        {
+            webBuilder.UseEnvironment("Development");
+            webBuilder.UseStartup<Startup>();
+            webBuilder.ConfigureTestServices(services =>
+            {
+                services.AddSingleton<IAmazonDynamoDB>(database);
+            });
+            webBuilder.UseTestServer();
+        })
+        .Build();
+
     [Fact]
     public async Task Should_ReturnUnauthorized_When_UserIsNotAuthenticated()
     {
         using (var database = DynamoDbLocalServerUtils.CreateDatabase())
         {
-            var host = new HostBuilder()
-                .ConfigureWebHost(webBuilder =>
-                {
-                    webBuilder.UseEnvironment("Development");
-                    webBuilder.UseStartup<Startup>();
-                    webBuilder.ConfigureTestServices(services =>
-                    {
-                        services.AddSingleton<IAmazonDynamoDB>(database.Client);
-                    });
-                    webBuilder.UseTestServer();
-                })
-                .Build();
+            var host = GetHost(database.Client);
             
             await host.StartAsync();
 

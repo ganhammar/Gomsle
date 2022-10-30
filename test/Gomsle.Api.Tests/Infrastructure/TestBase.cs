@@ -2,14 +2,19 @@ using System.Security.Claims;
 using Amazon.DynamoDBv2;
 using AspNetCore.Identity.AmazonDynamoDB;
 using Gomsle.Api.Features.Email;
+using Gomsle.Api.Features.User;
 using Gomsle.Api.Infrastructure;
 using MediatR;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
+using OpenIddict.Abstractions;
 using OpenIddict.AmazonDynamoDB;
+using OpenIddict.Server;
+using OpenIddict.Server.AspNetCore;
 using static OpenIddict.Abstractions.OpenIddictConstants;
 
 namespace Gomsle.Api.Tests.Infrastructure;
@@ -152,5 +157,42 @@ public abstract class TestBase
                 throw;
             }
         }
+    }
+
+    protected async Task<DynamoDbUser> CreateAndLoginValidUser(IServiceProvider services)
+    {
+        var mediator = services.GetRequiredService<IMediator>();
+        var userManager = services.GetRequiredService<UserManager<DynamoDbUser>>();
+        var email = "valid@gomsle.com";
+        var password = "itsaseasyas123";
+        var user = new DynamoDbUser
+        {
+            Email = email,
+            UserName = email,
+            EmailConfirmed = true,
+            TwoFactorEnabled = false,
+        };
+        await userManager.CreateAsync(user, password);
+        await mediator.Send(new LoginCommand.Command
+        {
+            Email = email,
+            Password = password,
+            RememberMe = false,
+        });
+        var httpContext = GetMock<HttpContext>();
+        var featureCollection = new FeatureCollection();
+        featureCollection.Set(new OpenIddictServerAspNetCoreFeature
+        {
+            Transaction = new OpenIddictServerTransaction
+            {
+                Request = new OpenIddictRequest
+                {
+                    Scope = "test",
+                },
+            },
+        });
+        httpContext!.Setup(x => x.Features).Returns(featureCollection);
+
+        return user;
     }
 }
