@@ -7,4 +7,6 @@ public class AccountModel
 {
     public string? NormalizedName { get; set; }
     public string? Name { get; set; }
+    public Dictionary<string, AccountRole> Members { get; set; }
+        = new Dictionary<string, AccountRole>();
 }

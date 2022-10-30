@@ -18,7 +18,7 @@ public class AccountControllerTests : TestBase
     };
 
     [Fact]
-    public async Task Should_RegisterUser_When_RequestIsValid() => await ControllerTest<AccountController>(
+    public async Task Should_CreateAccount_When_RequestIsValid() => await ControllerTest<AccountController>(
         // Arrange
         ConfigureController,
         // Act & Assert

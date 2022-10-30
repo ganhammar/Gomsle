@@ -1,9 +1,12 @@
 using Amazon.DynamoDBv2;
 using Gomsle.Api.Features.Email;
+using Gomsle.Api.Features.LocalApiAuthentication;
 using Gomsle.Api.Infrastructure;
 using MediatR;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.CookiePolicy;
 using Microsoft.IdentityModel.Logging;
+using OpenIddict.Abstractions;
 using static OpenIddict.Abstractions.OpenIddictConstants;
 
 namespace Gomsle.Api;
@@ -97,6 +100,18 @@ public class Startup
                 options.HttpOnly = HttpOnlyPolicy.Always;
             });
 
+        services.AddAuthentication()
+            .AddScheme<LocalApiAuthenticationOptions, LocalApiAuthenticationHandler>(
+                Constants.LocalApiAuthenticationScheme,
+                null,
+                options =>
+                {
+                    options.ExpectedScope = Constants.LocalApiScope;
+                })
+            .AddOpenIdConnect(Constants.FakeOidcHandler, Constants.FakeOidcHandler, _ => {});
+
+        services.AddTransient<IAuthenticationSchemeProvider, ApplicationAuthenticationSchemeProvider>();
+
         if (Environment.IsDevelopment())
         {
             IdentityModelEventSource.ShowPII = true; 
@@ -106,7 +121,15 @@ public class Startup
         services.AddSingleton<IEmailSender, EmailSender>();
         services.AddMediatR();
 
-        services.AddAuthorization();
+        services.AddAuthorization(options =>
+        {
+            options.AddPolicy(Constants.LocalApiPolicy, policy =>
+            {
+                policy.AddAuthenticationSchemes(Constants.LocalApiAuthenticationScheme);
+                policy.RequireAuthenticatedUser();
+                policy.RequireClaim(OpenIddictConstants.Claims.Scope, Constants.LocalApiScope);
+            });
+        });
         services
             .AddControllers()
             .AddFeatureFolders();
