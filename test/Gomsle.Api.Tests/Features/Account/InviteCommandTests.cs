@@ -8,6 +8,7 @@ using Xunit;
 
 namespace Gomsle.Api.Tests.Features.Account;
 
+[Collection("Sequential")]
 public class InviteCommandTests : TestBase
 {
     [Fact]
