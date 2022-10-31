@@ -47,7 +47,7 @@ public class SendCodeCommandTests : TestBase
 
             var mock = GetMock<IEmailSender>();
             mock!.Verify(x => 
-                x.Send(email, It.IsAny<string>(), It.IsAny<string>()),
+                x.Send(email, It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()),
                 Times.Once());
         });
 

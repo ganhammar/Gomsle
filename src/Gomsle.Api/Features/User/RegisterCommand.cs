@@ -97,7 +97,7 @@ public class RegisterCommand
 
             var body = $"Follow the link below to confirm your Gömsle account:<br /><a href=\"{url}\">{url}</a>";
 
-            await _emailSender.Send(user.Email, "Confirm Account", body);
+            await _emailSender.Send(user.Email, "Confirm Gömsle Account", body);
         }
     }
 }

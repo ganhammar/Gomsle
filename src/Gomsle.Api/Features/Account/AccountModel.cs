@@ -2,7 +2,7 @@ using Amazon.DynamoDBv2.DataModel;
 
 namespace Gomsle.Api.Features.Account;
 
-[DynamoDBTable(AccountSetup.TableName)]
+[DynamoDBTable(AccountSetup.AccountsTableName)]
 public class AccountModel
 {
     public string? NormalizedName { get; set; }

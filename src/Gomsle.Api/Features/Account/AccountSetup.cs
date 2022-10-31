@@ -7,43 +7,64 @@ namespace Gomsle.Api.Features.Account;
 
 public static class AccountSetup
 {
-    public const string TableName = "accounts";
+    public const string AccountsTableName = "accounts";
+    public const string AccountInvitationsTableName = "account_invitations";
 
     public static async Task EnsureInitializedAsync(
         IAmazonDynamoDB database,
         CancellationToken cancellationToken = default)
     {
-        var globalSecondaryIndexes = new List<GlobalSecondaryIndex>
+        var accountsGlobalSecondaryIndexes = new List<GlobalSecondaryIndex>
+        {
+        };
+
+        var accountInvitationsGlobalSecondaryIndexes = new List<GlobalSecondaryIndex>
         {
         };
 
         var tableNames = await database.ListTablesAsync(cancellationToken);
 
-        if (!tableNames.TableNames.Contains(TableName))
+        if (!tableNames.TableNames.Contains(AccountsTableName))
         {
-            await CreateTableAsync(
+            await CreateAccountTableAsync(
                 database,
-                globalSecondaryIndexes,
+                accountsGlobalSecondaryIndexes,
                 cancellationToken);
         }
         else
         {
             await DynamoDbUtils.UpdateSecondaryIndexes(
                 database,
-                TableName,
-                globalSecondaryIndexes,
+                AccountsTableName,
+                accountsGlobalSecondaryIndexes,
+                cancellationToken);
+        }
+
+        if (!tableNames.TableNames.Contains(AccountInvitationsTableName))
+        {
+            await CreateAccountInvitationsTableAsync(
+                database,
+                accountInvitationsGlobalSecondaryIndexes,
+                cancellationToken);
+        }
+        else
+        {
+            await DynamoDbUtils.UpdateSecondaryIndexes(
+                database,
+                AccountInvitationsTableName,
+                accountInvitationsGlobalSecondaryIndexes,
                 cancellationToken);
         }
     }
 
-    private static async Task CreateTableAsync(
+    private static async Task CreateAccountTableAsync(
         IAmazonDynamoDB database,
         List<GlobalSecondaryIndex>? globalSecondaryIndexes,
         CancellationToken cancellationToken)
     {
         var response = await database.CreateTableAsync(new CreateTableRequest
         {
-            TableName = TableName,
+            TableName = AccountsTableName,
             BillingMode = BillingMode.PAY_PER_REQUEST,
             KeySchema = new List<KeySchemaElement>
             {
@@ -66,12 +87,51 @@ public static class AccountSetup
 
         if (response.HttpStatusCode != HttpStatusCode.OK)
         {
-            throw new Exception($"Couldn't create table {TableName}");
+            throw new Exception($"Couldn't create table {AccountsTableName}");
         }
 
         await DynamoDbUtils.WaitForActiveTableAsync(
             database,
-            TableName,
+            AccountsTableName,
+            cancellationToken);
+    }
+
+    private static async Task CreateAccountInvitationsTableAsync(
+        IAmazonDynamoDB database,
+        List<GlobalSecondaryIndex>? globalSecondaryIndexes,
+        CancellationToken cancellationToken)
+    {
+        var response = await database.CreateTableAsync(new CreateTableRequest
+        {
+            TableName = AccountInvitationsTableName,
+            BillingMode = BillingMode.PAY_PER_REQUEST,
+            KeySchema = new List<KeySchemaElement>
+            {
+                new KeySchemaElement
+                {
+                    AttributeName = "Id",
+                    KeyType = KeyType.HASH,
+                },
+            },
+            AttributeDefinitions = new List<AttributeDefinition>
+            {
+                new AttributeDefinition
+                {
+                    AttributeName = "Id",
+                    AttributeType = ScalarAttributeType.S,
+                },
+            },
+            GlobalSecondaryIndexes = globalSecondaryIndexes,
+        }, cancellationToken);
+
+        if (response.HttpStatusCode != HttpStatusCode.OK)
+        {
+            throw new Exception($"Couldn't create table {AccountInvitationsTableName}");
+        }
+
+        await DynamoDbUtils.WaitForActiveTableAsync(
+            database,
+            AccountInvitationsTableName,
             cancellationToken);
     }
 }

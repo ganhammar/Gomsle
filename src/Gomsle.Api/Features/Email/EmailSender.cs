@@ -13,7 +13,7 @@ public class EmailSender : IEmailSender
         _emailSenderOptions = emailSenderOptions;
     }
 
-    public async Task Send(string email, string subject, string message)
+    public async Task Send(string email, string subject, string message, CancellationToken cancellationToken = default)
     {
         var sendGridClient = new SendGridClient(_emailSenderOptions.ApiKey);
         var emailFrom = new EmailAddress(_emailSenderOptions.FromAddress, _emailSenderOptions.FromName);
@@ -22,7 +22,7 @@ public class EmailSender : IEmailSender
         var sendGridMessage = MailHelper.CreateSingleEmail(emailFrom, emailTo, subject, message, message);
         sendGridMessage.SetClickTracking(false, false);
 
-        var response = await sendGridClient.SendEmailAsync(sendGridMessage);
+        var response = await sendGridClient.SendEmailAsync(sendGridMessage, cancellationToken);
 
         if (response.StatusCode != HttpStatusCode.Accepted)
         {

@@ -39,7 +39,7 @@ public class ForgotPasswordCommandTests : TestBase
 
             var mock = GetMock<IEmailSender>();
             mock!.Verify(x => 
-                x.Send(email, It.IsAny<string>(), It.IsAny<string>()),
+                x.Send(email, It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()),
                 Times.Once());
         });
 
@@ -64,7 +64,7 @@ public class ForgotPasswordCommandTests : TestBase
 
             var mock = GetMock<IEmailSender>();
             mock!.Verify(x => 
-                x.Send(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()),
+                x.Send(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()),
                 Times.Never());
         });
 
