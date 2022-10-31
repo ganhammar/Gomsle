@@ -17,6 +17,7 @@ public class InviteCommand
         public string? Email { get; set; }
         public AccountRole? Role { get; set; }
         public string? InvitationUrl { get; set; }
+        public string? SuccessUrl { get; set; }
     }
 
     public class CommandValidator : AbstractValidator<Command>
@@ -49,6 +50,9 @@ public class InviteCommand
 
             RuleFor(x => x.InvitationUrl)
                 .NotEmpty();
+
+            RuleFor(x => x.SuccessUrl)
+                .NotEmpty();
         }
     }
 
@@ -74,27 +78,41 @@ public class InviteCommand
         public override async Task<IResponse> Handle(
             Command request, CancellationToken cancellationToken)
         {
+            var account = await _dbContext.LoadAsync<AccountModel>(
+                request.AccountName!.UrlFriendly(), cancellationToken);
             var accountInvitation = new AccountInvitationModel
             {
-                AccountName = request.AccountName,
+                NormalizedAccountName = account.NormalizedName,
                 Email = request.Email,
                 Role = request.Role!.Value,
+                SuccessUrl = request.SuccessUrl,
             };
             await _dbContext.SaveAsync(accountInvitation);
-            await SendInvitationEmail(request, accountInvitation.Id, cancellationToken);
+            await SendInvitationEmail(request, account, accountInvitation.Id, cancellationToken);
 
             return Response();
         }
 
-        private async Task SendInvitationEmail(Command request, string token, CancellationToken cancellationToken)
+        private async Task SendInvitationEmail(
+            Command request, AccountModel account, string token, CancellationToken cancellationToken)
         {
-            var url = $"{request.InvitationUrl}?token={token}";
-            var account = await _dbContext.LoadAsync<AccountModel>(
-                request.AccountName!.UrlFriendly(), cancellationToken);
-
+            var url = await GetUrl(request.Email!, request.InvitationUrl!, token);
             var body = $"You've been invited to join the Gömsle account {account.Name}, follow the link below to become a member:<br /><a href=\"{url}\">{url}</a>";
 
             await _emailSender.Send(request.Email!, $"Invited to join {account.Name}", body, cancellationToken);
+        }
+
+        private async Task<string> GetUrl(string email, string invitationUrl, string token)
+        {
+            var user = await _userManager.FindByEmailAsync(email);
+
+            if (user != default)
+            {
+                var request = _httpContextAccessor.HttpContext!.Request;
+                return $"{request.Protocol}://{request.Host}/account/invite?token={token}";
+            }
+
+            return $"{invitationUrl}?token={token}";
         }
     }
 }

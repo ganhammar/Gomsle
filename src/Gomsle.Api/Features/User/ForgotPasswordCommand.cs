@@ -61,7 +61,7 @@ public class ForgotPasswordCommand
         {
             var token = await _userManager.GeneratePasswordResetTokenAsync(user);
             var request = _httpContextAccessor.HttpContext!.Request;
-            var url = $"{request.Protocol}://{request.Host}/account/reset"
+            var url = $"{request.Protocol}://{request.Host}/user/reset"
                 + $"?UserId={user.Id}&Token={token}&ReturnUrl={returnUrl}";
 
             var body = $"Follow the link below to reset your Gömsle account password:<br /><a href=\"{url}\">{url}</a>";
