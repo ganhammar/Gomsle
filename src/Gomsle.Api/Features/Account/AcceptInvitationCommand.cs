@@ -9,7 +9,7 @@ using Microsoft.AspNetCore.Identity;
 
 namespace Gomsle.Api.Features.Account;
 
-public class CompleteInvitationCommand
+public class AcceptInvitationCommand
 {
     public class Command : IRequest<IResponse<DynamoDbUser>>
     {
@@ -20,7 +20,9 @@ public class CompleteInvitationCommand
 
     public class CommandValidator : AbstractValidator<Command>
     {
-        public CommandValidator(IAmazonDynamoDB database)
+        public CommandValidator(
+            IAmazonDynamoDB database,
+            UserManager<DynamoDbUser> userManager)
         {
             RuleFor(x => x.Token)
                 .Cascade(CascadeMode.Stop)
@@ -36,8 +38,30 @@ public class CompleteInvitationCommand
                 .WithErrorCode("TokenNotValid")
                 .WithMessage("The invitation token is not valid");
 
-            RuleFor(x => x.Password)
-                .NotEmpty();
+            WhenAsync(async (command, cancellationToken) =>
+            {
+                if (command.Token == default)
+                {
+                    return false;
+                }
+
+                var context = new DynamoDBContext(database);
+                var invitation = await context.LoadAsync<AccountInvitationModel>(
+                    command.Token, cancellationToken);
+
+                if (invitation == default)
+                {
+                    return false;
+                }
+
+                var user = await userManager.FindByEmailAsync(invitation.Email);
+
+                return user == default;
+            }, () =>
+            {
+                RuleFor(x => x.Password)
+                    .NotEmpty();
+            });
         }
     }
 

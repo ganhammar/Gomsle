@@ -109,7 +109,7 @@ public class InviteCommand
             if (user != default)
             {
                 var request = _httpContextAccessor.HttpContext!.Request;
-                return $"{request.Protocol}://{request.Host}/account/invite?token={token}";
+                return $"{request.Protocol}://{request.Host}/account/acceptinvitation?token={token}";
             }
 
             return $"{invitationUrl}?token={token}";

@@ -18,4 +18,13 @@ public class AccountController : ApiControllerBase
     [HttpPost]
     public async Task<IActionResult> Create(CreateCommand.Command command)
         => Respond(await _mediator.Send(command));
+
+    [HttpPost]
+    public async Task<IActionResult> Invite(InviteCommand.Command command)
+        => Respond(await _mediator.Send(command));
+
+    [HttpPost, HttpGet]
+    [AllowAnonymous]
+    public async Task<IActionResult> AcceptInvitation(AcceptInvitationCommand.Command command)
+        => Respond(await _mediator.Send(command));
 }
