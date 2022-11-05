@@ -5,7 +5,7 @@ using MediatR;
 using Microsoft.AspNetCore.Identity;
 using OpenIddict.Abstractions;
 
-namespace Gomsle.Api.Infrastructure;
+namespace Gomsle.Api.Infrastructure.Extensions;
 
 public static class ServiceCollectionExtensions
 {

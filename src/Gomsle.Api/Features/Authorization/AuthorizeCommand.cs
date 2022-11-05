@@ -2,6 +2,7 @@ using System.Security.Claims;
 using AspNetCore.Identity.AmazonDynamoDB;
 using FluentValidation;
 using Gomsle.Api.Infrastructure;
+using Gomsle.Api.Infrastructure.Extensions;
 using MediatR;
 using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Identity;

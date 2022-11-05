@@ -1,4 +1,4 @@
-using Gomsle.Api.Infrastructure;
+using Gomsle.Api.Infrastructure.Extensions;
 using Xunit;
 
 namespace Gomsle.Api.Tests.Infrastructure;

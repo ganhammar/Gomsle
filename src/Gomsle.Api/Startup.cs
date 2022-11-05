@@ -2,6 +2,7 @@ using Amazon.DynamoDBv2;
 using Gomsle.Api.Features.Email;
 using Gomsle.Api.Features.LocalApiAuthentication;
 using Gomsle.Api.Infrastructure;
+using Gomsle.Api.Infrastructure.Extensions;
 using MediatR;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.CookiePolicy;

@@ -1,9 +1,12 @@
 using System.Security.Claims;
 using Amazon.DynamoDBv2;
+using Amazon.DynamoDBv2.DataModel;
 using AspNetCore.Identity.AmazonDynamoDB;
+using Gomsle.Api.Features.Account;
 using Gomsle.Api.Features.Email;
 using Gomsle.Api.Features.User;
 using Gomsle.Api.Infrastructure;
+using Gomsle.Api.Infrastructure.Extensions;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Features;
@@ -194,5 +197,22 @@ public abstract class TestBase
         httpContext!.Setup(x => x.Features).Returns(featureCollection);
 
         return user;
+    }
+
+    protected async Task<AccountModel> CreateAccount(IServiceProvider services, Dictionary<string, AccountRole>? members = default)
+    {
+        var database = services.GetRequiredService<IAmazonDynamoDB>();
+        var context = new DynamoDBContext(database);
+
+        var accountName = "Microsoft";
+        var account = new AccountModel
+        {
+            Name = accountName,
+            NormalizedName = accountName.UrlFriendly(),
+            Members = members ?? new(),
+        };
+        await context.SaveAsync(account);
+
+        return account;
     }
 }

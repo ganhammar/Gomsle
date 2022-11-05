@@ -2,7 +2,7 @@ using Amazon.DynamoDBv2;
 using Amazon.DynamoDBv2.DataModel;
 using AspNetCore.Identity.AmazonDynamoDB;
 using Gomsle.Api.Features.Account;
-using Gomsle.Api.Infrastructure;
+using Gomsle.Api.Infrastructure.Extensions;
 using Gomsle.Api.Tests.Infrastructure;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -54,24 +54,16 @@ public class AccountControllerTests : TestBase
         {
             // Arrange
             var mediator = services.GetRequiredService<IMediator>();
-            var database = services.GetRequiredService<IAmazonDynamoDB>();
-            var context = new DynamoDBContext(database);
-
-            // Create account
-            var accountName = "Microsoft";
-            var accountId = Guid.NewGuid().ToString();
-            await context.SaveAsync(new AccountModel
+            var user = await CreateAndLoginValidUser(services);
+            var account = await CreateAccount(services, new()
             {
-                Id = accountId,
-                Name = accountName,
-                NormalizedName = accountName.UrlFriendly(),
-                Members = new Dictionary<string, AccountRole>(),
+                { user.Id, AccountRole.Owner },
             });
 
             // Act
             var result = await controller.Invite(new()
             {
-                AccountId = accountId,
+                AccountId = account.Id,
                 Email = "test@gomsle.com",
                 Role = AccountRole.Administrator,
                 InvitationUrl = "https://gomsle.com/microsoft/invite",

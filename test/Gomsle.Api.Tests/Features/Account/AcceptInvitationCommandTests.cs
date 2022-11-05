@@ -2,7 +2,7 @@ using Amazon.DynamoDBv2;
 using Amazon.DynamoDBv2.DataModel;
 using AspNetCore.Identity.AmazonDynamoDB;
 using Gomsle.Api.Features.Account;
-using Gomsle.Api.Infrastructure;
+using Gomsle.Api.Infrastructure.Extensions;
 using Gomsle.Api.Tests.Infrastructure;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;

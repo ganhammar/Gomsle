@@ -1,7 +1,7 @@
-using Amazon.DynamoDBv2;
 using AspNetCore.Identity.AmazonDynamoDB;
 using Gomsle.Api.Features.Account;
 using Gomsle.Api.Features.Email;
+using Gomsle.Api.Infrastructure.Validators;
 using Gomsle.Api.Tests.Infrastructure;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
@@ -98,8 +98,7 @@ public class InviteCommandTests : TestBase
                 Role = AccountRole.Administrator,
                 SuccessUrl = "https://gomsle.com/microsoft/login",
             };
-            var database = services.GetRequiredService<IAmazonDynamoDB>();
-            var validator = new InviteCommand.CommandValidator(database);
+            var validator = new InviteCommand.CommandValidator(services);
 
             // Act
             var response = await validator.ValidateAsync(command);
@@ -123,15 +122,14 @@ public class InviteCommandTests : TestBase
                 Role = AccountRole.Administrator,
                 SuccessUrl = "https://gomsle.com/microsoft/login",
             };
-            var database = services.GetRequiredService<IAmazonDynamoDB>();
-            var validator = new InviteCommand.CommandValidator(database);
+            var validator = new InviteCommand.CommandValidator(services);
 
             // Act
             var response = await validator.ValidateAsync(command);
 
             // Assert
             Assert.False(response.IsValid);
-            Assert.Contains(response.Errors, x => x.ErrorCode == "AccountNotFound" &&
+            Assert.Contains(response.Errors, x => x.ErrorCode == nameof(ErrorCodes.NotAuthenticated) &&
                 x.PropertyName == nameof(InviteCommand.Command.AccountId));
         });
 
@@ -147,8 +145,7 @@ public class InviteCommandTests : TestBase
                 Role = AccountRole.Administrator,
                 SuccessUrl = "https://gomsle.com/microsoft/login",
             };
-            var database = services.GetRequiredService<IAmazonDynamoDB>();
-            var validator = new InviteCommand.CommandValidator(database);
+            var validator = new InviteCommand.CommandValidator(services);
 
             // Act
             var response = await validator.ValidateAsync(command);
@@ -172,8 +169,7 @@ public class InviteCommandTests : TestBase
                 Role = AccountRole.Administrator,
                 SuccessUrl = "https://gomsle.com/microsoft/login",
             };
-            var database = services.GetRequiredService<IAmazonDynamoDB>();
-            var validator = new InviteCommand.CommandValidator(database);
+            var validator = new InviteCommand.CommandValidator(services);
 
             // Act
             var response = await validator.ValidateAsync(command);
@@ -196,8 +192,7 @@ public class InviteCommandTests : TestBase
                 Role = AccountRole.Administrator,
                 SuccessUrl = "https://gomsle.com/microsoft/login",
             };
-            var database = services.GetRequiredService<IAmazonDynamoDB>();
-            var validator = new InviteCommand.CommandValidator(database);
+            var validator = new InviteCommand.CommandValidator(services);
 
             // Act
             var response = await validator.ValidateAsync(command);
@@ -220,8 +215,7 @@ public class InviteCommandTests : TestBase
                 Role = AccountRole.Administrator,
                 InvitationUrl = "https://gomsle.com/microsoft/invite",
             };
-            var database = services.GetRequiredService<IAmazonDynamoDB>();
-            var validator = new InviteCommand.CommandValidator(database);
+            var validator = new InviteCommand.CommandValidator(services);
 
             // Act
             var response = await validator.ValidateAsync(command);
@@ -244,8 +238,7 @@ public class InviteCommandTests : TestBase
                 InvitationUrl = "https://gomsle.com/microsoft/invite",
                 SuccessUrl = "https://gomsle.com/microsoft/login",
             };
-            var database = services.GetRequiredService<IAmazonDynamoDB>();
-            var validator = new InviteCommand.CommandValidator(database);
+            var validator = new InviteCommand.CommandValidator(services);
 
             // Act
             var response = await validator.ValidateAsync(command);
@@ -269,8 +262,7 @@ public class InviteCommandTests : TestBase
                 Role = AccountRole.Owner,
                 SuccessUrl = "https://gomsle.com/microsoft/login",
             };
-            var database = services.GetRequiredService<IAmazonDynamoDB>();
-            var validator = new InviteCommand.CommandValidator(database);
+            var validator = new InviteCommand.CommandValidator(services);
 
             // Act
             var response = await validator.ValidateAsync(command);

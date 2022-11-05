@@ -1,7 +1,7 @@
 using Amazon.DynamoDBv2;
 using Amazon.DynamoDBv2.DataModel;
 using Gomsle.Api.Features.Account;
-using Gomsle.Api.Infrastructure;
+using Gomsle.Api.Infrastructure.Extensions;
 using Gomsle.Api.Tests.Infrastructure;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit;

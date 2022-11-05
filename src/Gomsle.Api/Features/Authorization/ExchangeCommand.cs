@@ -2,6 +2,7 @@ using System.Collections.Immutable;
 using System.Security.Claims;
 using FluentValidation;
 using Gomsle.Api.Infrastructure;
+using Gomsle.Api.Infrastructure.Extensions;
 using MediatR;
 using Microsoft.AspNetCore;
 using Microsoft.IdentityModel.Tokens;

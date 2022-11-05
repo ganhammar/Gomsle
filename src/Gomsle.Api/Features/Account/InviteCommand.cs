@@ -4,6 +4,7 @@ using AspNetCore.Identity.AmazonDynamoDB;
 using FluentValidation;
 using Gomsle.Api.Features.Email;
 using Gomsle.Api.Infrastructure;
+using Gomsle.Api.Infrastructure.Validators;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
 
@@ -22,21 +23,13 @@ public class InviteCommand
 
     public class CommandValidator : AbstractValidator<Command>
     {
-        public CommandValidator(IAmazonDynamoDB database)
+        public CommandValidator(IServiceProvider services)
         {
             RuleFor(x => x.AccountId)
                 .Cascade(CascadeMode.Stop)
                 .NotEmpty()
-                .MustAsync(async (accountId, cancellationToken) =>
-                {
-                    var context = new DynamoDBContext(database);
-                    var account = await context.LoadAsync<AccountModel>(
-                        accountId, cancellationToken);
-
-                    return account != default;
-                })
-                .WithErrorCode("AccountNotFound")
-                .WithMessage("No account with that id found");
+                .IsAuthenticated(services)
+                .HasRoleForAccount(services, AccountRole.Administrator, AccountRole.Owner);
 
             RuleFor(x => x.Email)
                 .NotEmpty()

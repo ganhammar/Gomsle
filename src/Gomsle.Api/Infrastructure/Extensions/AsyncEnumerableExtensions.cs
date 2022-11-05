@@ -1,4 +1,4 @@
-namespace Gomsle.Api.Infrastructure;
+namespace Gomsle.Api.Infrastructure.Extensions;
 
 public static class AsyncEnumerableExtensions
 {

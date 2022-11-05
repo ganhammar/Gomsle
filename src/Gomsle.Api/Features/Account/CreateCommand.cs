@@ -3,6 +3,7 @@ using Amazon.DynamoDBv2.DataModel;
 using Amazon.DynamoDBv2.DocumentModel;
 using FluentValidation;
 using Gomsle.Api.Infrastructure;
+using Gomsle.Api.Infrastructure.Extensions;
 using MediatR;
 using OpenIddict.Abstractions;
 using static OpenIddict.Abstractions.OpenIddictConstants;
@@ -73,8 +74,7 @@ public class CreateCommand
             Command request, CancellationToken cancellationToken)
         {
             var context = new DynamoDBContext(_database);
-            var userId = _httpContextAccessor.HttpContext!.User
-                .GetClaim(Claims.Subject);
+            var userId = _httpContextAccessor.HttpContext!.User.GetUserId();
             var account = new AccountModel
             {
                 Name = request.Name,
