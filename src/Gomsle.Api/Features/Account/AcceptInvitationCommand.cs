@@ -84,7 +84,7 @@ public class AcceptInvitationCommand
             var invitation = await _dbContext.LoadAsync<AccountInvitationModel>(
                 request.Token, cancellationToken);
             var account = await _dbContext.LoadAsync<AccountModel>(
-                invitation.NormalizedAccountName, cancellationToken);
+                invitation.AccountId, cancellationToken);
             var user = await _userManager.FindByEmailAsync(invitation.Email);
 
             if (user == default)

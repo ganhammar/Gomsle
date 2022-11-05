@@ -59,8 +59,10 @@ public class AccountControllerTests : TestBase
 
             // Create account
             var accountName = "Microsoft";
+            var accountId = Guid.NewGuid().ToString();
             await context.SaveAsync(new AccountModel
             {
+                Id = accountId,
                 Name = accountName,
                 NormalizedName = accountName.UrlFriendly(),
                 Members = new Dictionary<string, AccountRole>(),
@@ -69,7 +71,7 @@ public class AccountControllerTests : TestBase
             // Act
             var result = await controller.Invite(new()
             {
-                AccountName = accountName,
+                AccountId = accountId,
                 Email = "test@gomsle.com",
                 Role = AccountRole.Administrator,
                 InvitationUrl = "https://gomsle.com/microsoft/invite",
@@ -97,8 +99,10 @@ public class AccountControllerTests : TestBase
 
             // Create account
             var accountName = "Microsoft";
+            var accountId = Guid.NewGuid().ToString();
             await context.SaveAsync(new AccountModel
             {
+                Id = accountId,
                 Name = accountName,
                 NormalizedName = accountName.UrlFriendly(),
                 Members = new Dictionary<string, AccountRole>(),
@@ -107,7 +111,7 @@ public class AccountControllerTests : TestBase
             // Create invitation
             var model = new AccountInvitationModel
             {
-                NormalizedAccountName = accountName.UrlFriendly(),
+                AccountId = accountId,
                 Email = "test@gomsle.com",
                 Role = AccountRole.Administrator,
                 SuccessUrl = "https://gomsle.com/microsoft/login",

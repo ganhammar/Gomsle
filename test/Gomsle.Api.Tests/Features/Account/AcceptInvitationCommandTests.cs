@@ -2,6 +2,7 @@ using Amazon.DynamoDBv2;
 using Amazon.DynamoDBv2.DataModel;
 using AspNetCore.Identity.AmazonDynamoDB;
 using Gomsle.Api.Features.Account;
+using Gomsle.Api.Infrastructure;
 using Gomsle.Api.Tests.Infrastructure;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
@@ -13,13 +14,13 @@ namespace Gomsle.Api.Tests.Features.Account;
 public class AcceptInvitationCommandTests : TestBase
 {
     private async Task<AccountInvitationModel> CreateInvitation(
-        string email, string accountName, IServiceProvider services)
+        string email, string accountId, IServiceProvider services)
     {
         var database = services.GetRequiredService<IAmazonDynamoDB>();
         var context = new DynamoDBContext(database);
         var model = new AccountInvitationModel
         {
-            NormalizedAccountName = accountName,
+            AccountId = accountId,
             Email = email,
             Role = AccountRole.Administrator,
             SuccessUrl = "https://gomsle.com/microsoft/login",
@@ -35,12 +36,11 @@ public class AcceptInvitationCommandTests : TestBase
         {
             // Arrange
             var user = await CreateAndLoginValidUser(services);
-            var accountName = "microsoft";
-            await mediator.Send(new CreateCommand.Command
+            var account = await mediator.Send(new CreateCommand.Command
             {
-                Name = accountName,
+                Name = "Microsoft",
             });
-            var model = await CreateInvitation("test@gomsle.com", accountName, services);
+            var model = await CreateInvitation("test@gomsle.com", account.Result!.Id, services);
             var command = new AcceptInvitationCommand.Command
             {
                 Token = model.Id,
@@ -81,7 +81,7 @@ public class AcceptInvitationCommandTests : TestBase
         await MediatorTest(async (mediator, services) =>
         {
             // Arrange
-            var model = await CreateInvitation("test@gomsle.com", "Microsoft", services);
+            var model = await CreateInvitation("test@gomsle.com", Guid.NewGuid().ToString(), services);
             var command = new AcceptInvitationCommand.Command
             {
                 Token = model.Id,
@@ -105,14 +105,19 @@ public class AcceptInvitationCommandTests : TestBase
         {
             // Arrange
             var database = services.GetRequiredService<IAmazonDynamoDB>();
+            var context = new DynamoDBContext(database);
             var userManager = services.GetRequiredService<UserManager<DynamoDbUser>>();
-            var accountName = "microsoft";
             var email = "test@gomsle.com";
 
             // Create account
-            await mediator.Send(new CreateCommand.Command
+            var accountName = "Microsoft";
+            var accountId = Guid.NewGuid().ToString();
+            await context.SaveAsync(new AccountModel
             {
+                Id = accountId,
                 Name = accountName,
+                NormalizedName = accountName.UrlFriendly(),
+                Members = new Dictionary<string, AccountRole>(),
             });
 
             // Create user
@@ -122,7 +127,7 @@ public class AcceptInvitationCommandTests : TestBase
             });
 
             // Create invitation
-            var model = await CreateInvitation(email, accountName, services);
+            var model = await CreateInvitation(email, accountId, services);
 
             // Command for test
             var command = new AcceptInvitationCommand.Command

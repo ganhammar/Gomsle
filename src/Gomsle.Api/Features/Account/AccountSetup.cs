@@ -16,6 +16,18 @@ public static class AccountSetup
     {
         var accountsGlobalSecondaryIndexes = new List<GlobalSecondaryIndex>
         {
+            new GlobalSecondaryIndex
+            {
+                IndexName = "NormalizedName-index",
+                KeySchema = new List<KeySchemaElement>
+                {
+                    new KeySchemaElement("NormalizedName", KeyType.HASH),
+                },
+                Projection = new Projection
+                {
+                    ProjectionType = ProjectionType.ALL,
+                },
+            },
         };
 
         var accountInvitationsGlobalSecondaryIndexes = new List<GlobalSecondaryIndex>
@@ -70,12 +82,17 @@ public static class AccountSetup
             {
                 new KeySchemaElement
                 {
-                    AttributeName = "NormalizedName",
+                    AttributeName = "Id",
                     KeyType = KeyType.HASH,
                 },
             },
             AttributeDefinitions = new List<AttributeDefinition>
             {
+                new AttributeDefinition
+                {
+                    AttributeName = "Id",
+                    AttributeType = ScalarAttributeType.S,
+                },
                 new AttributeDefinition
                 {
                     AttributeName = "NormalizedName",

@@ -22,13 +22,13 @@ public class InviteCommandTests : TestBase
             var accountName = "Microsoft";
             var email = "test@gomsle.com";
             var url = "https://gomsle.com/microsoft/invite";
-            await mediator.Send(new CreateCommand.Command
+            var account = await mediator.Send(new CreateCommand.Command
             {
                 Name = accountName,
             });
             var command = new InviteCommand.Command
             {
-                AccountName = accountName,
+                AccountId = account.Result!.Id,
                 Email = email,
                 InvitationUrl = url,
                 Role = AccountRole.Administrator,
@@ -61,13 +61,13 @@ public class InviteCommandTests : TestBase
                 Email = email,
                 UserName = email,
             });
-            await mediator.Send(new CreateCommand.Command
+            var account = await mediator.Send(new CreateCommand.Command
             {
                 Name = accountName,
             });
             var command = new InviteCommand.Command
             {
-                AccountName = accountName,
+                AccountId = account.Result!.Id,
                 Email = email,
                 InvitationUrl = "https://elsmog.com/microsoft/invite",
                 Role = AccountRole.Administrator,
@@ -87,7 +87,7 @@ public class InviteCommandTests : TestBase
         });
 
     [Fact]
-    public async Task Should_NotBeValid_When_AccountNameIsNotSet() =>
+    public async Task Should_NotBeValid_When_AccountIdIsNotSet() =>
         await MediatorTest(async (mediator, services) =>
         {
             // Arrange
@@ -107,7 +107,7 @@ public class InviteCommandTests : TestBase
             // Assert
             Assert.False(response.IsValid);
             Assert.Contains(response.Errors, x => x.ErrorCode == "NotEmptyValidator" &&
-                x.PropertyName == nameof(InviteCommand.Command.AccountName));
+                x.PropertyName == nameof(InviteCommand.Command.AccountId));
         });
 
     [Fact]
@@ -117,7 +117,7 @@ public class InviteCommandTests : TestBase
             // Arrange
             var command = new InviteCommand.Command
             {
-                AccountName = "Mycrosöft",
+                AccountId = Guid.NewGuid().ToString(),
                 Email = "test@gomsle.com",
                 InvitationUrl = "https://gomsle.com/microsoft/invite",
                 Role = AccountRole.Administrator,
@@ -132,7 +132,7 @@ public class InviteCommandTests : TestBase
             // Assert
             Assert.False(response.IsValid);
             Assert.Contains(response.Errors, x => x.ErrorCode == "AccountNotFound" &&
-                x.PropertyName == nameof(InviteCommand.Command.AccountName));
+                x.PropertyName == nameof(InviteCommand.Command.AccountId));
         });
 
     [Fact]
@@ -142,7 +142,7 @@ public class InviteCommandTests : TestBase
             // Arrange
             var command = new InviteCommand.Command
             {
-                AccountName = "Microsoft",
+                AccountId = Guid.NewGuid().ToString(),
                 InvitationUrl = "https://gomsle.com/microsoft/invite",
                 Role = AccountRole.Administrator,
                 SuccessUrl = "https://gomsle.com/microsoft/login",
@@ -167,7 +167,7 @@ public class InviteCommandTests : TestBase
             var command = new InviteCommand.Command
             {
                 Email = "not-an-email",
-                AccountName = "Microsoft",
+                AccountId = Guid.NewGuid().ToString(),
                 InvitationUrl = "https://gomsle.com/microsoft/invite",
                 Role = AccountRole.Administrator,
                 SuccessUrl = "https://gomsle.com/microsoft/login",
@@ -192,7 +192,7 @@ public class InviteCommandTests : TestBase
             var command = new InviteCommand.Command
             {
                 Email = "test@gomsle.com",
-                AccountName = "Microsoft",
+                AccountId = Guid.NewGuid().ToString(),
                 Role = AccountRole.Administrator,
                 SuccessUrl = "https://gomsle.com/microsoft/login",
             };
@@ -216,7 +216,7 @@ public class InviteCommandTests : TestBase
             var command = new InviteCommand.Command
             {
                 Email = "test@gomsle.com",
-                AccountName = "Microsoft",
+                AccountId = Guid.NewGuid().ToString(),
                 Role = AccountRole.Administrator,
                 InvitationUrl = "https://gomsle.com/microsoft/invite",
             };
@@ -240,7 +240,7 @@ public class InviteCommandTests : TestBase
             var command = new InviteCommand.Command
             {
                 Email = "test@gomsle.com",
-                AccountName = "Microsoft",
+                AccountId = Guid.NewGuid().ToString(),
                 InvitationUrl = "https://gomsle.com/microsoft/invite",
                 SuccessUrl = "https://gomsle.com/microsoft/login",
             };
@@ -264,7 +264,7 @@ public class InviteCommandTests : TestBase
             var command = new InviteCommand.Command
             {
                 Email = "test@gomsle.com",
-                AccountName = "Microsoft",
+                AccountId = Guid.NewGuid().ToString(),
                 InvitationUrl = "https://gomsle.com/microsoft/invite",
                 Role = AccountRole.Owner,
                 SuccessUrl = "https://gomsle.com/microsoft/login",

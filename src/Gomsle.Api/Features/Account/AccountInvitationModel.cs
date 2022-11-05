@@ -6,7 +6,7 @@ namespace Gomsle.Api.Features.Account;
 public class AccountInvitationModel
 {
     public string Id { get; set; } = Guid.NewGuid().ToString();
-    public string? NormalizedAccountName { get; set; }
+    public string? AccountId { get; set; }
     public string? Email { get; set; }
     public AccountRole Role { get; set; }
     public string? SuccessUrl { get; set; }

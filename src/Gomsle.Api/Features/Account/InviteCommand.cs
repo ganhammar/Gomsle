@@ -13,7 +13,7 @@ public class InviteCommand
 {
     public class Command : IRequest<IResponse>
     {
-        public string? AccountName { get; set; }
+        public string? AccountId { get; set; }
         public string? Email { get; set; }
         public AccountRole? Role { get; set; }
         public string? InvitationUrl { get; set; }
@@ -24,19 +24,19 @@ public class InviteCommand
     {
         public CommandValidator(IAmazonDynamoDB database)
         {
-            RuleFor(x => x.AccountName)
+            RuleFor(x => x.AccountId)
                 .Cascade(CascadeMode.Stop)
                 .NotEmpty()
-                .MustAsync(async (accountName, cancellationToken) =>
+                .MustAsync(async (accountId, cancellationToken) =>
                 {
                     var context = new DynamoDBContext(database);
                     var account = await context.LoadAsync<AccountModel>(
-                        accountName!.UrlFriendly(), cancellationToken);
+                        accountId, cancellationToken);
 
                     return account != default;
                 })
                 .WithErrorCode("AccountNotFound")
-                .WithMessage("No account with that name found");
+                .WithMessage("No account with that id found");
 
             RuleFor(x => x.Email)
                 .NotEmpty()
@@ -79,10 +79,10 @@ public class InviteCommand
             Command request, CancellationToken cancellationToken)
         {
             var account = await _dbContext.LoadAsync<AccountModel>(
-                request.AccountName!.UrlFriendly(), cancellationToken);
+                request.AccountId, cancellationToken);
             var accountInvitation = new AccountInvitationModel
             {
-                NormalizedAccountName = account.NormalizedName,
+                AccountId = account.Id,
                 Email = request.Email,
                 Role = request.Role!.Value,
                 SuccessUrl = request.SuccessUrl,
