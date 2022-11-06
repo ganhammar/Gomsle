@@ -10,10 +10,12 @@ namespace Gomsle.Api.Infrastructure.Validators;
 public class HasRoleForAccountValidator<T> : AsyncPropertyValidator<T, string?>
 {
     private readonly IServiceProvider _services;
+    private readonly AccountRole[] _roles;
 
     public HasRoleForAccountValidator(IServiceProvider services, params AccountRole[] roles)
     {
         _services = services;
+        _roles = roles;
     }
 
     public override string Name => nameof(ErrorCodes.MisingRoleForAccount);
@@ -23,30 +25,7 @@ public class HasRoleForAccountValidator<T> : AsyncPropertyValidator<T, string?>
         string? accountId,
         CancellationToken cancellationToken)
     {
-        if (string.IsNullOrEmpty(accountId))
-        {
-            return false;
-        }
-
-        var database = _services.GetRequiredService<IAmazonDynamoDB>();
-        var httpContextAccessor = _services.GetRequiredService<IHttpContextAccessor>();
-
-        var context = new DynamoDBContext(database);
-        var account = await context.LoadAsync<AccountModel>(
-            accountId, cancellationToken);
-
-        if (account == default)
-        {
-            return false;
-        }
-
-        var userId = httpContextAccessor.HttpContext!.User.GetUserId();
-        if (account.Members.TryGetValue(userId!, out var role))
-        {
-            return new[] { AccountRole.Administrator, AccountRole.Owner }.Contains(role);
-        }
-
-        return false;
+        return await HasRoleForAccount.Validate(_services, accountId, _roles, cancellationToken);
     }
 
     protected override string GetDefaultMessageTemplate(string errorCode)

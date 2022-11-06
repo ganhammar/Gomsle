@@ -38,8 +38,8 @@ public class InviteCommand
             RuleFor(x => x.Role)
                 .NotEmpty()
                 .NotEqual(AccountRole.Owner)
-                .WithErrorCode("OnlyOneOwner")
-                .WithMessage("There can be only one owner");
+                .WithErrorCode(nameof(ErrorCodes.OnlyOneOwner))
+                .WithMessage(ErrorCodes.OnlyOneOwner);
 
             RuleFor(x => x.InvitationUrl)
                 .NotEmpty();

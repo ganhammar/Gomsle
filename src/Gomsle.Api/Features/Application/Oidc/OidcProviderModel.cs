@@ -1,8 +1,12 @@
-namespace Gomsle.Api.Features.Application;
+using Amazon.DynamoDBv2.DataModel;
 
+namespace Gomsle.Api.Features.Application.Oidc;
+
+[DynamoDBTable(ApplicationSetup.ApplicationOidcProvidersTableName)]
 public class OidcProviderModel
 {
     public string Id { get; set; } = Guid.NewGuid().ToString();
+    public string? ApplicationId { get; set; }
     public string? Name { get; set; }
     public string? AuthorityUrl { get; set; }
     public string? ClientId { get; set; }

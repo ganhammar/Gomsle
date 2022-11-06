@@ -5,8 +5,6 @@ using FluentValidation;
 using Gomsle.Api.Infrastructure;
 using Gomsle.Api.Infrastructure.Extensions;
 using MediatR;
-using OpenIddict.Abstractions;
-using static OpenIddict.Abstractions.OpenIddictConstants;
 
 namespace Gomsle.Api.Features.Account;
 

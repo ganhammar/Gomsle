@@ -141,7 +141,7 @@ public class CreateCommand
             await _dbContext.SaveAsync(applicationConfiguration);
             var origins = await SaveOrigins(request, application.Id, cancellationToken);
 
-            return Response(ApplicationDtoMapper.ToDto(application, applicationConfiguration, origins));
+            return Response(ApplicationDtoMapper.ToDto(application, applicationConfiguration, origins, new()));
         }
 
         private async Task<List<ApplicationOriginModel>> SaveOrigins(Command request, string applicationId, CancellationToken cancellationToken)

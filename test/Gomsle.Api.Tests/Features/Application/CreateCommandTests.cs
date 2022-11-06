@@ -18,19 +18,19 @@ public class CreateCommandTests : TestBase
             DefaultOrigin = "https://microsoft.com",
             DisplayName = "Microsoft Azure AD Application",
             Origins = new()
-                {
-                    "https://microsoft.se",
-                },
+            {
+                "https://microsoft.se",
+            },
             RedirectUris = new()
-                {
-                    "https://microsoft.com/login/callback",
-                    "https://microsoft.se/login/callback",
-                },
+            {
+                "https://microsoft.com/login/callback",
+                "https://microsoft.se/login/callback",
+            },
             PostLogoutRedirectUris = new()
-                {
-                    "https://microsoft.com/logout/callback",
-                    "https://microsoft.se/logout/callback",
-                },
+            {
+                "https://microsoft.com/logout/callback",
+                "https://microsoft.se/logout/callback",
+            },
         };
 
 
@@ -69,7 +69,7 @@ public class CreateCommandTests : TestBase
                 AutoProvision = true,
                 EnableProvision = true,
                 DisplayName = "Microsoft Azure AD Application",
-            };;
+            };
 
             // Act
             var response = await mediator.Send(command);

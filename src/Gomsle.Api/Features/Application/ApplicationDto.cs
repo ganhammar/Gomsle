@@ -1,3 +1,5 @@
+using Gomsle.Api.Features.Application.Oidc;
+
 namespace Gomsle.Api.Features.Application;
 
 public class ApplicationDto

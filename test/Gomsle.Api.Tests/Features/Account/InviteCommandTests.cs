@@ -269,7 +269,7 @@ public class InviteCommandTests : TestBase
 
             // Assert
             Assert.False(response.IsValid);
-            Assert.Contains(response.Errors, x => x.ErrorCode == "OnlyOneOwner" &&
+            Assert.Contains(response.Errors, x => x.ErrorCode == nameof(ErrorCodes.OnlyOneOwner) &&
                 x.PropertyName == nameof(InviteCommand.Command.Role));
         });
 }
