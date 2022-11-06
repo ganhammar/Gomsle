@@ -131,24 +131,50 @@ public class CreateCommand
             var application = (OpenIddictDynamoDbApplication)await _applicationManager
                 .CreateAsync(applicationDescriptor, cancellationToken);
 
-            var origins = request.Origins;
-            if (string.IsNullOrEmpty(request.DefaultOrigin) == false)
-            {
-                origins.Prepend(request.DefaultOrigin);
-            }
-
             var applicationConfiguration = new ApplicationConfigurationModel
             {
                 AccountId = request.AccountId,
-                DefaultOrigin = request.DefaultOrigin,
-                Origins = origins,
                 EnableProvision = request.EnableProvision!.Value,
                 AutoProvision = request.AutoProvision!.Value,
                 ApplicationId = application.Id,
             };
             await _dbContext.SaveAsync(applicationConfiguration);
+            var origins = await SaveOrigins(request, application.Id, cancellationToken);
 
-            return Response(ApplicationDtoMapper.ToDto(application, applicationConfiguration));
+            return Response(ApplicationDtoMapper.ToDto(application, applicationConfiguration, origins));
+        }
+
+        private async Task<List<ApplicationOriginModel>> SaveOrigins(Command request, string applicationId, CancellationToken cancellationToken)
+        {
+            var result = new List<ApplicationOriginModel>();
+            var origins = request.Origins;
+            if (string.IsNullOrEmpty(request.DefaultOrigin) == false)
+            {
+                origins.Add(request.DefaultOrigin);
+            }
+
+            if (origins.Any() == false)
+            {
+                return result;
+            }
+
+            var batch = _dbContext.CreateBatchWrite<ApplicationOriginModel>();
+
+            foreach (var origin in origins)
+            {
+                var model = new ApplicationOriginModel
+                {
+                    ApplicationId = applicationId,
+                    IsDefault = origin == request.DefaultOrigin,
+                    Origin = origin,
+                };
+                batch.AddPutItem(model);
+                result.Add(model);
+            }
+
+            await batch.ExecuteAsync(cancellationToken);
+
+            return result;
         }
     }
 }

@@ -45,8 +45,9 @@ public abstract class TestBase
 
         var request = new Mock<HttpRequest>();
         request.Setup(x => x.Scheme).Returns("http");
-        request.Setup(x => x.Host).Returns(HostString.FromUriComponent("http://gomsle.com"));
+        request.Setup(x => x.Host).Returns(HostString.FromUriComponent("gomsle.com"));
         request.Setup(x => x.PathBase).Returns(PathString.FromUriComponent("/api"));
+        Mocks.Add(request);
 
         var httpContext = new Mock<HttpContext>();
         httpContext.Setup(x => x.Request).Returns(request.Object);

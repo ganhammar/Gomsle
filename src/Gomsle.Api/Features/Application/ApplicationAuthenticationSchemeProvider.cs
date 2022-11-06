@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.Extensions.Options;
 
-namespace Gomsle.Api.Features.LocalApiAuthentication;
+namespace Gomsle.Api.Features.Application;
 
 public class ApplicationAuthenticationSchemeProvider : AuthenticationSchemeProvider
 {

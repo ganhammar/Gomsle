@@ -7,7 +7,8 @@ namespace Gomsle.Api.Features.Application;
 
 public class ApplicationSetup
 {
-    public const string ApplicationConfigurationsTableName = "application_configuration";
+    public const string ApplicationConfigurationsTableName = "application_configurations";
+    public const string ApplicationOriginsTableName = "application_origins";
 
     public static async Task EnsureInitializedAsync(
         IAmazonDynamoDB database,
@@ -17,11 +18,15 @@ public class ApplicationSetup
         {
         };
 
+        var applicationOriginsGlobalSecondaryIndexes = new List<GlobalSecondaryIndex>
+        {
+        };
+
         var tableNames = await database.ListTablesAsync(cancellationToken);
 
         if (!tableNames.TableNames.Contains(ApplicationConfigurationsTableName))
         {
-            await CreateAccountTableAsync(
+            await CreateApplicationConfigurationsTableAsync(
                 database,
                 applicationConfigurationsGlobalSecondaryIndexes,
                 cancellationToken);
@@ -34,9 +39,25 @@ public class ApplicationSetup
                 applicationConfigurationsGlobalSecondaryIndexes,
                 cancellationToken);
         }
+
+        if (!tableNames.TableNames.Contains(ApplicationOriginsTableName))
+        {
+            await CreateApplicationOriginsTableAsync(
+                database,
+                applicationOriginsGlobalSecondaryIndexes,
+                cancellationToken);
+        }
+        else
+        {
+            await DynamoDbUtils.UpdateSecondaryIndexes(
+                database,
+                ApplicationOriginsTableName,
+                applicationOriginsGlobalSecondaryIndexes,
+                cancellationToken);
+        }
     }
 
-    private static async Task CreateAccountTableAsync(
+    private static async Task CreateApplicationConfigurationsTableAsync(
         IAmazonDynamoDB database,
         List<GlobalSecondaryIndex>? globalSecondaryIndexes,
         CancellationToken cancellationToken)
@@ -72,6 +93,55 @@ public class ApplicationSetup
         await DynamoDbUtils.WaitForActiveTableAsync(
             database,
             ApplicationConfigurationsTableName,
+            cancellationToken);
+    }
+
+    private static async Task CreateApplicationOriginsTableAsync(
+        IAmazonDynamoDB database,
+        List<GlobalSecondaryIndex>? globalSecondaryIndexes,
+        CancellationToken cancellationToken)
+    {
+        var response = await database.CreateTableAsync(new CreateTableRequest
+        {
+            TableName = ApplicationOriginsTableName,
+            BillingMode = BillingMode.PAY_PER_REQUEST,
+            KeySchema = new List<KeySchemaElement>
+            {
+                new KeySchemaElement
+                {
+                    AttributeName = "Origin",
+                    KeyType = KeyType.HASH,
+                },
+                new KeySchemaElement
+                {
+                    AttributeName = "ApplicationId",
+                    KeyType = KeyType.RANGE,
+                },
+            },
+            AttributeDefinitions = new List<AttributeDefinition>
+            {
+                new AttributeDefinition
+                {
+                    AttributeName = "Origin",
+                    AttributeType = ScalarAttributeType.S,
+                },
+                new AttributeDefinition
+                {
+                    AttributeName = "ApplicationId",
+                    AttributeType = ScalarAttributeType.S,
+                },
+            },
+            GlobalSecondaryIndexes = globalSecondaryIndexes,
+        }, cancellationToken);
+
+        if (response.HttpStatusCode != HttpStatusCode.OK)
+        {
+            throw new Exception($"Couldn't create table {ApplicationOriginsTableName}");
+        }
+
+        await DynamoDbUtils.WaitForActiveTableAsync(
+            database,
+            ApplicationOriginsTableName,
             cancellationToken);
     }
 }

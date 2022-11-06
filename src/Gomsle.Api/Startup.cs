@@ -1,4 +1,6 @@
 using Amazon.DynamoDBv2;
+using Gomsle.Api.Features.Application;
+using Gomsle.Api.Features.Cors;
 using Gomsle.Api.Features.Email;
 using Gomsle.Api.Features.LocalApiAuthentication;
 using Gomsle.Api.Infrastructure;
@@ -6,6 +8,7 @@ using Gomsle.Api.Infrastructure.Extensions;
 using MediatR;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.CookiePolicy;
+using Microsoft.AspNetCore.Cors.Infrastructure;
 using Microsoft.IdentityModel.Logging;
 using OpenIddict.Abstractions;
 using static OpenIddict.Abstractions.OpenIddictConstants;
@@ -39,6 +42,9 @@ public class Startup
             }));
 
         services.AddIdentity();
+
+        services.AddCors();
+        services.AddTransient<ICorsPolicyProvider, CorsPolicyProvider>();
 
         services
             .AddOpenIddict()

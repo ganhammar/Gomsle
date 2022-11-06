@@ -6,4 +6,5 @@ public static class Constants
     public const string LocalApiPolicy = "Internal";
     public const string LocalApiScope = "gomsle_api";
     public const string FakeOidcHandler = "FakeOidcHandler";
+    public const string ApplicationCookie = "Gomsle.Application";
 }
