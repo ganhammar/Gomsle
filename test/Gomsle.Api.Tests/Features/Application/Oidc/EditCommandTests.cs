@@ -4,14 +4,15 @@ using Gomsle.Api.Tests.Infrastructure;
 using MediatR;
 using Xunit;
 using CreateCommand = Gomsle.Api.Features.Application.Oidc.CreateCommand;
+using EditCommand = Gomsle.Api.Features.Application.Oidc.EditCommand;
 
 namespace Gomsle.Api.Tests.Features.Application.Oidc;
 
 [Collection("Sequential")]
-public class CreateCommandTests : TestBase
+public class EditCommandTests : TestBase
 {
     [Fact]
-    public async Task Should_CreateApplication_When_RequestIsValid() =>
+    public async Task Should_EditApplication_When_RequestIsValid() =>
         await MediatorTest(async (mediator, services) =>
         {
             // Arrange
@@ -25,39 +26,39 @@ public class CreateCommandTests : TestBase
         });
 
     [Fact]
-    public async Task Should_NotBeValid_When_ApplicationIdIsNotSet() =>
+    public async Task Should_NotBeValid_When_IdIsNotSet() =>
         await MediatorTest(async (mediator, services) =>
         {
             // Arrange
             var command = await Prepare(services, mediator);
-            command.ApplicationId = default;
-            var validator = new CreateCommand.CommandValidator(services);
+            command.Id = default;
+            var validator = new EditCommand.CommandValidator(services);
 
             // Act
             var response = await validator.ValidateAsync(command);
 
             // Assert
             Assert.False(response.IsValid);
-            Assert.Contains(response.Errors, error => error.PropertyName == nameof(CreateCommand.Command.ApplicationId)
+            Assert.Contains(response.Errors, error => error.PropertyName == nameof(EditCommand.Command.Id)
                 && error.ErrorCode == "NotEmptyValidator");
         });
 
     [Fact]
-    public async Task Should_NotBeValid_When_ApplicationDoesntExist() =>
+    public async Task Should_NotBeValid_When_ProviderDoesntExist() =>
         await MediatorTest(async (mediator, services) =>
         {
             // Arrange
             var command = await Prepare(services, mediator);
-            command.ApplicationId = Guid.NewGuid().ToString();
-            var validator = new CreateCommand.CommandValidator(services);
+            command.Id = Guid.NewGuid().ToString();
+            var validator = new EditCommand.CommandValidator(services);
 
             // Act
             var response = await validator.ValidateAsync(command);
 
             // Assert
             Assert.False(response.IsValid);
-            Assert.Contains(response.Errors, error => error.PropertyName == nameof(CreateCommand.Command.ApplicationId)
-                && error.ErrorCode == nameof(ErrorCodes.MisingRoleForAccount));
+            Assert.Contains(response.Errors, error => error.PropertyName == nameof(EditCommand.Command.Id)
+                && error.ErrorCode == nameof(ErrorCodes.NotAuthorized));
         });
 
     [Fact]
@@ -67,32 +68,14 @@ public class CreateCommandTests : TestBase
             // Arrange
             var command = await Prepare(services, mediator);
             command.ClientId = default;
-            var validator = new CreateCommand.CommandValidator(services);
+            var validator = new EditCommand.CommandValidator(services);
 
             // Act
             var response = await validator.ValidateAsync(command);
 
             // Assert
             Assert.False(response.IsValid);
-            Assert.Contains(response.Errors, error => error.PropertyName == nameof(CreateCommand.Command.ClientId)
-                && error.ErrorCode == "NotEmptyValidator");
-        });
-
-    [Fact]
-    public async Task Should_NotBeValid_When_ClientSecretIsNotSet() =>
-        await MediatorTest(async (mediator, services) =>
-        {
-            // Arrange
-            var command = await Prepare(services, mediator);
-            command.ClientSecret = default;
-            var validator = new CreateCommand.CommandValidator(services);
-
-            // Act
-            var response = await validator.ValidateAsync(command);
-
-            // Assert
-            Assert.False(response.IsValid);
-            Assert.Contains(response.Errors, error => error.PropertyName == nameof(CreateCommand.Command.ClientSecret)
+            Assert.Contains(response.Errors, error => error.PropertyName == nameof(EditCommand.Command.ClientId)
                 && error.ErrorCode == "NotEmptyValidator");
         });
 
@@ -103,14 +86,14 @@ public class CreateCommandTests : TestBase
             // Arrange
             var command = await Prepare(services, mediator);
             command.Name = default;
-            var validator = new CreateCommand.CommandValidator(services);
+            var validator = new EditCommand.CommandValidator(services);
 
             // Act
             var response = await validator.ValidateAsync(command);
 
             // Assert
             Assert.False(response.IsValid);
-            Assert.Contains(response.Errors, error => error.PropertyName == nameof(CreateCommand.Command.Name)
+            Assert.Contains(response.Errors, error => error.PropertyName == nameof(EditCommand.Command.Name)
                 && error.ErrorCode == "NotEmptyValidator");
         });
 
@@ -121,14 +104,14 @@ public class CreateCommandTests : TestBase
             // Arrange
             var command = await Prepare(services, mediator);
             command.AuthorityUrl = default;
-            var validator = new CreateCommand.CommandValidator(services);
+            var validator = new EditCommand.CommandValidator(services);
 
             // Act
             var response = await validator.ValidateAsync(command);
 
             // Assert
             Assert.False(response.IsValid);
-            Assert.Contains(response.Errors, error => error.PropertyName == nameof(CreateCommand.Command.AuthorityUrl)
+            Assert.Contains(response.Errors, error => error.PropertyName == nameof(EditCommand.Command.AuthorityUrl)
                 && error.ErrorCode == "NotEmptyValidator");
         });
 
@@ -139,14 +122,14 @@ public class CreateCommandTests : TestBase
             // Arrange
             var command = await Prepare(services, mediator);
             command.AuthorityUrl = "not-a-valid-uri";
-            var validator = new CreateCommand.CommandValidator(services);
+            var validator = new EditCommand.CommandValidator(services);
 
             // Act
             var response = await validator.ValidateAsync(command);
 
             // Assert
             Assert.False(response.IsValid);
-            Assert.Contains(response.Errors, error => error.PropertyName == nameof(CreateCommand.Command.AuthorityUrl)
+            Assert.Contains(response.Errors, error => error.PropertyName == nameof(EditCommand.Command.AuthorityUrl)
                 && error.ErrorCode == nameof(ErrorCodes.InvalidUri));
         });
 
@@ -157,14 +140,14 @@ public class CreateCommandTests : TestBase
             // Arrange
             var command = await Prepare(services, mediator);
             command.ResponseType = default;
-            var validator = new CreateCommand.CommandValidator(services);
+            var validator = new EditCommand.CommandValidator(services);
 
             // Act
             var response = await validator.ValidateAsync(command);
 
             // Assert
             Assert.False(response.IsValid);
-            Assert.Contains(response.Errors, error => error.PropertyName == nameof(CreateCommand.Command.ResponseType)
+            Assert.Contains(response.Errors, error => error.PropertyName == nameof(EditCommand.Command.ResponseType)
                 && error.ErrorCode == "NotEmptyValidator");
         });
 
@@ -175,14 +158,14 @@ public class CreateCommandTests : TestBase
             // Arrange
             var command = await Prepare(services, mediator);
             command.ResponseType = "not-in-the-spec";
-            var validator = new CreateCommand.CommandValidator(services);
+            var validator = new EditCommand.CommandValidator(services);
 
             // Act
             var response = await validator.ValidateAsync(command);
 
             // Assert
             Assert.False(response.IsValid);
-            Assert.Contains(response.Errors, error => error.PropertyName == nameof(CreateCommand.Command.ResponseType)
+            Assert.Contains(response.Errors, error => error.PropertyName == nameof(EditCommand.Command.ResponseType)
                 && error.ErrorCode == nameof(ErrorCodes.ResponseTypeIsInvalid));
         });
 
@@ -193,14 +176,14 @@ public class CreateCommandTests : TestBase
             // Arrange
             var command = await Prepare(services, mediator);
             command.IsDefault = default;
-            var validator = new CreateCommand.CommandValidator(services);
+            var validator = new EditCommand.CommandValidator(services);
 
             // Act
             var response = await validator.ValidateAsync(command);
 
             // Assert
             Assert.False(response.IsValid);
-            Assert.Contains(response.Errors, error => error.PropertyName == nameof(CreateCommand.Command.IsDefault)
+            Assert.Contains(response.Errors, error => error.PropertyName == nameof(EditCommand.Command.IsDefault)
                 && error.ErrorCode == "NotEmptyValidator");
         });
 
@@ -211,14 +194,14 @@ public class CreateCommandTests : TestBase
             // Arrange
             var command = await Prepare(services, mediator);
             command.IsVisible = default;
-            var validator = new CreateCommand.CommandValidator(services);
+            var validator = new EditCommand.CommandValidator(services);
 
             // Act
             var response = await validator.ValidateAsync(command);
 
             // Assert
             Assert.False(response.IsValid);
-            Assert.Contains(response.Errors, error => error.PropertyName == nameof(CreateCommand.Command.IsVisible)
+            Assert.Contains(response.Errors, error => error.PropertyName == nameof(EditCommand.Command.IsVisible)
                 && error.ErrorCode == "NotEmptyValidator");
         });
 
@@ -235,8 +218,9 @@ public class CreateCommandTests : TestBase
         return result.Result!.Id!;
     }
 
-    private CreateCommand.Command GetValidCommand(string applicationId)
-        => new CreateCommand.Command
+    private async Task<string> CreateOidcProvider(IMediator mediator, string applicationId)
+    {
+        var result = await mediator.Send(new CreateCommand.Command
         {
             ApplicationId = applicationId,
             AuthorityUrl = "https://microsoft.com",
@@ -247,9 +231,26 @@ public class CreateCommandTests : TestBase
             Name = "Micrsoft Internal",
             ResponseType = "code",
             Scopes = new() { "email", "profile" },
+        });
+
+        return result.Result!.Id;
+    }
+
+    private EditCommand.Command GetValidCommand(string id, string applicationId)
+        => new EditCommand.Command
+        {
+            Id = id,
+            AuthorityUrl = "https://microsoft.com",
+            ClientId = "microsoft-internal-azure-id-client",
+            ClientSecret = "microsoft-internal-azure-id-client.secret",
+            IsDefault = false,
+            IsVisible = true,
+            Name = "Micrsoft Internal",
+            ResponseType = "code",
+            Scopes = new() { "email", "profile" },
         };
 
-    private async Task<CreateCommand.Command> Prepare(
+    private async Task<EditCommand.Command> Prepare(
         IServiceProvider services, IMediator mediator)
     {
         var user = await CreateAndLoginValidUser(services);
@@ -258,6 +259,7 @@ public class CreateCommandTests : TestBase
             { user.Id, AccountRole.Owner },
         });
         var applicationId = await CreateApplication(mediator, account.Id);
-        return GetValidCommand(applicationId);
+        var oidcProviderId = await CreateOidcProvider(mediator, applicationId);
+        return GetValidCommand(oidcProviderId, applicationId);
     }
 }

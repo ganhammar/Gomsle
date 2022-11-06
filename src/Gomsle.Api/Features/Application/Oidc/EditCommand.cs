@@ -5,16 +5,14 @@ using Gomsle.Api.Features.Account;
 using Gomsle.Api.Infrastructure;
 using Gomsle.Api.Infrastructure.Validators;
 using MediatR;
-using OpenIddict.Abstractions;
-using OpenIddict.AmazonDynamoDB;
 
 namespace Gomsle.Api.Features.Application.Oidc;
 
-public class CreateCommand
+public class EditCommand
 {
     public class Command : OidcProviderBaseInput, IRequest<IResponse<OidcProviderModel>>
     {
-        public string? ApplicationId { get; set; }
+        public string? Id { get; set; }
     }
 
     public class CommandValidator : AbstractValidator<Command>
@@ -24,24 +22,22 @@ public class CreateCommand
             RuleFor(x => x)
                 .SetValidator(new OidcProviderBaseInputValidator(services));
 
-            RuleFor(x => x.ApplicationId)
+            RuleFor(x => x.Id)
                 .Cascade(CascadeMode.Stop)
                 .NotEmpty()
-                .IsAuthenticated(services)
-                .MustAsync(async (command, applicationId, cancellationToken) =>
+                .MustAsync(async (command, id, cancellationToken) =>
                 {
-                    var applicationManager = services.GetRequiredService<IOpenIddictApplicationManager>();
-                    var application = (OpenIddictDynamoDbApplication?)await applicationManager
-                        .FindByIdAsync(applicationId!, cancellationToken);
+                    var dbContext = new DynamoDBContext(
+                        services.GetRequiredService<IAmazonDynamoDB>());
+                    var oidcProvider = await dbContext.LoadAsync<OidcProviderModel>(id, cancellationToken);
 
-                    if (application == default)
+                    if (oidcProvider == default)
                     {
                         return false;
                     }
 
-                    var dbContext = new DynamoDBContext(services.GetRequiredService<IAmazonDynamoDB>());
                     var applicationConfiguration = await dbContext.LoadAsync<ApplicationConfigurationModel>(
-                        application.Id, cancellationToken);
+                        oidcProvider.ApplicationId, cancellationToken);
 
                     if (applicationConfiguration == default)
                     {
@@ -54,11 +50,8 @@ public class CreateCommand
                         new[] { AccountRole.Administrator, AccountRole.Owner },
                         cancellationToken);
                 })
-                .WithErrorCode(nameof(ErrorCodes.MisingRoleForAccount))
-                .WithMessage(ErrorCodes.MisingRoleForAccount);
-
-            RuleFor(x => x.ClientSecret)
-                .NotEmpty();
+                .WithErrorCode(nameof(ErrorCodes.NotAuthorized))
+                .WithMessage(ErrorCodes.NotAuthorized);
         }
     }
 
@@ -74,23 +67,25 @@ public class CreateCommand
         public override async Task<IResponse<OidcProviderModel>> Handle(
             Command request, CancellationToken cancellationToken)
         {
-            var model = new OidcProviderModel
+            var oidcProvider = await _dbContext.LoadAsync<OidcProviderModel>(request.Id);
+
+            oidcProvider.AuthorityUrl = request.AuthorityUrl;
+            oidcProvider.ClientId = request.ClientId;
+            oidcProvider.IsDefault = request.IsDefault!.Value;
+            oidcProvider.IsVisible = request.IsVisible!.Value;
+            oidcProvider.Name = request.Name;
+            oidcProvider.RequiredDomains = request.RequiredDomains;
+            oidcProvider.ResponseType = request.ResponseType;
+            oidcProvider.Scopes = request.Scopes;
+
+            if (request.ClientSecret != default)
             {
-                ApplicationId = request.ApplicationId,
-                AuthorityUrl = request.AuthorityUrl,
-                ClientId = request.ClientId,
-                ClientSecret = request.ClientSecret,
-                IsDefault = request.IsDefault!.Value,
-                IsVisible = request.IsVisible!.Value,
-                Name = request.Name,
-                RequiredDomains = request.RequiredDomains,
-                ResponseType = request.ResponseType,
-                Scopes = request.Scopes,
-            };
+                oidcProvider.ClientSecret = request.ClientSecret;
+            }
 
-            await _dbContext.SaveAsync(model, cancellationToken);
+            await _dbContext.SaveAsync(oidcProvider);
 
-            return Response(model);
+            return Response(oidcProvider);
         }
     }
 }
