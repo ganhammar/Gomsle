@@ -1,6 +1,7 @@
 using AspNetCore.Identity.AmazonDynamoDB;
 using FluentValidation;
 using Gomsle.Api.Infrastructure;
+using Gomsle.Api.Infrastructure.Validators;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
 
@@ -35,8 +36,8 @@ public class LoginCommand
 
                             return user != default && user.EmailConfirmed;
                         })
-                        .WithErrorCode("EmailUnconfirmed")
-                        .WithMessage("The email is not confirmed");
+                        .WithErrorCode(nameof(ErrorCodes.EmailUnconfirmed))
+                        .WithMessage(ErrorCodes.EmailUnconfirmed);
                 });
             });
 

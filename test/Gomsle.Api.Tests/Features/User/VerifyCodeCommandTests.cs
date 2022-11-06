@@ -1,5 +1,6 @@
 using AspNetCore.Identity.AmazonDynamoDB;
 using Gomsle.Api.Features.User;
+using Gomsle.Api.Infrastructure.Validators;
 using Gomsle.Api.Tests.Infrastructure;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
@@ -109,7 +110,7 @@ public class VerifyCodeCommandTests : TestBase
             // Assert
             Assert.False(response.IsValid);
             Assert.Contains(response.Errors, error =>
-                error.ErrorCode == "NoLoginAttemptInProgress");
+                error.ErrorCode == nameof(ErrorCodes.NoLoginAttemptInProgress));
         });
 
     [Fact]
@@ -146,6 +147,6 @@ public class VerifyCodeCommandTests : TestBase
             // Assert
             Assert.False(response.IsValid);
             Assert.Contains(response.Errors, error =>
-                error.ErrorCode == "TwoFactorProviderNotValid" && error.PropertyName == "Provider");
+                error.ErrorCode == nameof(ErrorCodes.TwoFactorProviderNotValid) && error.PropertyName == "Provider");
         });
 }

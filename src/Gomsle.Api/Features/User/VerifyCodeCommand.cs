@@ -1,6 +1,7 @@
 using AspNetCore.Identity.AmazonDynamoDB;
 using FluentValidation;
 using Gomsle.Api.Infrastructure;
+using Gomsle.Api.Infrastructure.Validators;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
 
@@ -29,8 +30,8 @@ public class VerifyCodeCommand
 
                     return user != default;
                 })
-                .WithErrorCode("NoLoginAttemptInProgress")
-                .WithMessage("No login request is in progress");
+                .WithErrorCode(nameof(ErrorCodes.NoLoginAttemptInProgress))
+                .WithMessage(ErrorCodes.NoLoginAttemptInProgress);
 
             RuleFor(x => x.Provider)
                 .NotEmpty()
@@ -46,8 +47,8 @@ public class VerifyCodeCommand
 
                     return providers.Contains(provider);
                 })
-                .WithErrorCode("TwoFactorProviderNotValid")
-                .WithMessage("The selected two factor provider is not valid in the current context");
+                .WithErrorCode(nameof(ErrorCodes.TwoFactorProviderNotValid))
+                .WithMessage(ErrorCodes.TwoFactorProviderNotValid);
 
             RuleFor(x => x.Code)
                 .NotEmpty();

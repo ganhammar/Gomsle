@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using Xunit;
+using Gomsle.Api.Infrastructure.Validators;
 
 namespace Gomsle.Api.Tests.Features.User;
 
@@ -101,7 +102,7 @@ public class SendCodeCommandTests : TestBase
             // Assert
             Assert.False(response.IsValid);
             Assert.Contains(response.Errors, error =>
-                error.ErrorCode == "NoLoginAttemptInProgress");
+                error.ErrorCode == nameof(ErrorCodes.NoLoginAttemptInProgress));
         });
 
     [Fact]
@@ -137,6 +138,6 @@ public class SendCodeCommandTests : TestBase
             // Assert
             Assert.False(response.IsValid);
             Assert.Contains(response.Errors, error =>
-                error.ErrorCode == "TwoFactorProviderNotValid" && error.PropertyName == "Provider");
+                error.ErrorCode == nameof(ErrorCodes.TwoFactorProviderNotValid) && error.PropertyName == "Provider");
         });
 }

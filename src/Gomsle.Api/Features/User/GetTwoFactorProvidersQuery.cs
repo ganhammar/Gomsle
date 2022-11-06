@@ -1,6 +1,7 @@
 using AspNetCore.Identity.AmazonDynamoDB;
 using FluentValidation;
 using Gomsle.Api.Infrastructure;
+using Gomsle.Api.Infrastructure.Validators;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
 
@@ -23,8 +24,8 @@ public class GetTwoFactorProvidersQuery
 
                     return user != default;
                 })
-                .WithErrorCode("NoLoginAttemptInProgress")
-                .WithMessage("No login request is in progress");
+                .WithErrorCode(nameof(ErrorCodes.NoLoginAttemptInProgress))
+                .WithMessage(ErrorCodes.NoLoginAttemptInProgress);
         }
     }
 
