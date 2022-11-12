@@ -202,11 +202,6 @@ public class ApplicationSetup
                     AttributeName = "Id",
                     AttributeType = ScalarAttributeType.S,
                 },
-                new AttributeDefinition
-                {
-                    AttributeName = "ApplicationId",
-                    AttributeType = ScalarAttributeType.S,
-                },
             },
             GlobalSecondaryIndexes = globalSecondaryIndexes,
         }, cancellationToken);
