@@ -5,8 +5,6 @@ using Gomsle.Api.Features.Account;
 using Gomsle.Api.Infrastructure;
 using Gomsle.Api.Infrastructure.Validators;
 using MediatR;
-using OpenIddict.Abstractions;
-using OpenIddict.AmazonDynamoDB;
 
 namespace Gomsle.Api.Features.Application.Oidc;
 
