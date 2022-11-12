@@ -12,7 +12,7 @@ namespace Gomsle.Api.Tests.Features.Application.Oidc;
 public class EditCommandTests : TestBase
 {
     [Fact]
-    public async Task Should_EditApplication_When_RequestIsValid() =>
+    public async Task Should_EditProvider_When_RequestIsValid() =>
         await MediatorTest(async (mediator, services) =>
         {
             // Arrange
@@ -205,24 +205,11 @@ public class EditCommandTests : TestBase
                 && error.ErrorCode == "NotEmptyValidator");
         });
 
-    private async Task<string> CreateApplication(IMediator mediator, string accountId)
-    {
-        var result = await mediator.Send(new Gomsle.Api.Features.Application.CreateCommand.Command
-        {
-            AccountId = accountId,
-            AutoProvision = true,
-            EnableProvision = true,
-            DisplayName = "Microsoft Azure AD Application",
-        });
-
-        return result.Result!.Id!;
-    }
-
-    private async Task<string> CreateOidcProvider(IMediator mediator, string applicationId)
+    private async Task<string> CreateOidcProvider(IMediator mediator, string accountId)
     {
         var result = await mediator.Send(new CreateCommand.Command
         {
-            ApplicationId = applicationId,
+            AccountId = accountId,
             AuthorityUrl = "https://microsoft.com",
             ClientId = "microsoft-internal-azure-id-client",
             ClientSecret = "microsoft-internal-azure-id-client.secret",
@@ -236,7 +223,7 @@ public class EditCommandTests : TestBase
         return result.Result!.Id;
     }
 
-    private EditCommand.Command GetValidCommand(string id, string applicationId)
+    private EditCommand.Command GetValidCommand(string id)
         => new EditCommand.Command
         {
             Id = id,
@@ -258,8 +245,7 @@ public class EditCommandTests : TestBase
         {
             { user.Id, AccountRole.Owner },
         });
-        var applicationId = await CreateApplication(mediator, account.Id);
-        var oidcProviderId = await CreateOidcProvider(mediator, applicationId);
-        return GetValidCommand(oidcProviderId, applicationId);
+        var oidcProviderId = await CreateOidcProvider(mediator, account.Id);
+        return GetValidCommand(oidcProviderId);
     }
 }

@@ -14,7 +14,7 @@ public class CreateCommand
 {
     public class Command : OidcProviderBaseInput, IRequest<IResponse<OidcProviderModel>>
     {
-        public string? ApplicationId { get; set; }
+        public string? AccountId { get; set; }
     }
 
     public class CommandValidator : AbstractValidator<Command>
@@ -24,38 +24,11 @@ public class CreateCommand
             RuleFor(x => x)
                 .SetValidator(new OidcProviderBaseInputValidator(services));
 
-            RuleFor(x => x.ApplicationId)
+            RuleFor(x => x.AccountId)
                 .Cascade(CascadeMode.Stop)
                 .NotEmpty()
                 .IsAuthenticated(services)
-                .MustAsync(async (command, applicationId, cancellationToken) =>
-                {
-                    var applicationManager = services.GetRequiredService<IOpenIddictApplicationManager>();
-                    var application = (OpenIddictDynamoDbApplication?)await applicationManager
-                        .FindByIdAsync(applicationId!, cancellationToken);
-
-                    if (application == default)
-                    {
-                        return false;
-                    }
-
-                    var dbContext = new DynamoDBContext(services.GetRequiredService<IAmazonDynamoDB>());
-                    var applicationConfiguration = await dbContext.LoadAsync<ApplicationConfigurationModel>(
-                        application.Id, cancellationToken);
-
-                    if (applicationConfiguration == default)
-                    {
-                        return false;
-                    }
-
-                    return await HasRoleForAccount.Validate(
-                        services,
-                        applicationConfiguration.AccountId,
-                        new[] { AccountRole.Administrator, AccountRole.Owner },
-                        cancellationToken);
-                })
-                .WithErrorCode(nameof(ErrorCodes.MisingRoleForAccount))
-                .WithMessage(ErrorCodes.MisingRoleForAccount);
+                .HasRoleForAccount(services, AccountRole.Administrator, AccountRole.Owner);
 
             RuleFor(x => x.ClientSecret)
                 .NotEmpty();
@@ -76,7 +49,7 @@ public class CreateCommand
         {
             var model = new OidcProviderModel
             {
-                ApplicationId = request.ApplicationId,
+                AccountId = request.AccountId,
                 AuthorityUrl = request.AuthorityUrl,
                 ClientId = request.ClientId,
                 ClientSecret = request.ClientSecret,

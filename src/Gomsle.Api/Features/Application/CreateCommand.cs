@@ -97,6 +97,7 @@ public class CreateCommand
                 EnableProvision = request.EnableProvision!.Value,
                 AutoProvision = request.AutoProvision!.Value,
                 ApplicationId = application.Id,
+                ConnectedOidcProviders = request.ConnectedOidcProviders,
             };
             await _dbContext.SaveAsync(applicationConfiguration);
             var origins = await SaveOrigins(request, application.Id, cancellationToken);

@@ -7,6 +7,7 @@ using Gomsle.Api.Tests.Infrastructure;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit;
+using CreateOidcProviderCommand = Gomsle.Api.Features.Application.Oidc.CreateCommand;
 
 namespace Gomsle.Api.Tests.Features.Application;
 
@@ -56,6 +57,38 @@ public class EditCommandTests : TestBase
             Assert.Empty(response.Result!.PostLogoutRedirectUris);
         });
 
+    [Fact]
+    public async Task Should_EditApplication_When_OidcProviderIsSpecified() =>
+        await MediatorTest(async (mediator, services) =>
+        {
+            // Arrange
+            var user = await CreateAndLoginValidUser(services);
+            var account = await CreateAccount(services, new()
+            {
+                { user.Id, AccountRole.Owner },
+            });
+            var applicationId = await CreateApplication(mediator, account.Id);
+            var command = GetValidCommand(applicationId);
+            var oidcProvider = await mediator.Send(new CreateOidcProviderCommand.Command
+            {
+                AccountId = account.Id,
+                AuthorityUrl = "https://microsoft.com",
+                ClientId = "microsoft-internal-azure-id-client",
+                ClientSecret = "microsoft-internal-azure-id-client.secret",
+                IsDefault = false,
+                IsVisible = true,
+                Name = "Micrsoft Internal",
+                ResponseType = "code",
+                Scopes = new() { "email", "profile" },
+            });
+            command.ConnectedOidcProviders.Add(oidcProvider.Result!.Id);
+
+            // Act
+            var response = await mediator.Send(command);
+
+            // Assert
+            Assert.True(response.IsValid);
+        });
     
     [Fact]
     public async Task Should_NotBeValid_When_UserIsntAuthorized() =>
@@ -87,6 +120,46 @@ public class EditCommandTests : TestBase
             Assert.False(response.IsValid);
             Assert.Contains(response.Errors, error => error.PropertyName == nameof(EditCommand.Command.Id)
                 && error.ErrorCode == nameof(ErrorCodes.NotAuthorized));
+        });
+
+    [Fact]
+    public async Task Should_NotBeValid_When_OidcProviderBelongsToOtherAccount() =>
+        await MediatorTest(async (mediator, services) =>
+        {
+            // Arrange
+            var user = await CreateAndLoginValidUser(services);
+            var account = await CreateAccount(services, new()
+            {
+                { user.Id, AccountRole.Owner },
+            });
+            var applicationId = await CreateApplication(mediator, account.Id);
+            var command = GetValidCommand(applicationId);
+            var otherAccount = await CreateAccount(services, new()
+            {
+                { user.Id, AccountRole.Owner },
+            });
+            var oidcProvider = await mediator.Send(new CreateOidcProviderCommand.Command
+            {
+                AccountId = otherAccount.Id,
+                AuthorityUrl = "https://microsoft.com",
+                ClientId = "microsoft-internal-azure-id-client",
+                ClientSecret = "microsoft-internal-azure-id-client.secret",
+                IsDefault = false,
+                IsVisible = true,
+                Name = "Micrsoft Internal",
+                ResponseType = "code",
+                Scopes = new() { "email", "profile" },
+            });
+            command.ConnectedOidcProviders.Add(oidcProvider.Result!.Id);
+            var validator = new EditCommand.CommandValidator(services);
+
+            // Act
+            var response = await validator.ValidateAsync(command);
+
+            // Assert
+            Assert.False(response.IsValid);
+            Assert.Contains(response.Errors, error => error.PropertyName == nameof(EditCommand.Command.ConnectedOidcProviders)
+                && error.ErrorCode == nameof(ErrorCodes.InvalidOidcProvider));
         });
 
     [Fact]

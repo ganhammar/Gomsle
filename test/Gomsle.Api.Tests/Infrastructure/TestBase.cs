@@ -3,6 +3,7 @@ using Amazon.DynamoDBv2;
 using Amazon.DynamoDBv2.DataModel;
 using AspNetCore.Identity.AmazonDynamoDB;
 using Gomsle.Api.Features.Account;
+using Gomsle.Api.Features.Application;
 using Gomsle.Api.Features.Email;
 using Gomsle.Api.Features.User;
 using Gomsle.Api.Infrastructure;

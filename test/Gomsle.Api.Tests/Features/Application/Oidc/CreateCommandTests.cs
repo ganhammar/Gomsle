@@ -11,7 +11,7 @@ namespace Gomsle.Api.Tests.Features.Application.Oidc;
 public class CreateCommandTests : TestBase
 {
     [Fact]
-    public async Task Should_CreateApplication_When_RequestIsValid() =>
+    public async Task Should_CreateProvider_When_RequestIsValid() =>
         await MediatorTest(async (mediator, services) =>
         {
             // Arrange
@@ -25,12 +25,12 @@ public class CreateCommandTests : TestBase
         });
 
     [Fact]
-    public async Task Should_NotBeValid_When_ApplicationIdIsNotSet() =>
+    public async Task Should_NotBeValid_When_AccoundIdIsNotSet() =>
         await MediatorTest(async (mediator, services) =>
         {
             // Arrange
             var command = await Prepare(services, mediator);
-            command.ApplicationId = default;
+            command.AccountId = default;
             var validator = new CreateCommand.CommandValidator(services);
 
             // Act
@@ -38,17 +38,17 @@ public class CreateCommandTests : TestBase
 
             // Assert
             Assert.False(response.IsValid);
-            Assert.Contains(response.Errors, error => error.PropertyName == nameof(CreateCommand.Command.ApplicationId)
+            Assert.Contains(response.Errors, error => error.PropertyName == nameof(CreateCommand.Command.AccountId)
                 && error.ErrorCode == "NotEmptyValidator");
         });
 
     [Fact]
-    public async Task Should_NotBeValid_When_ApplicationDoesntExist() =>
+    public async Task Should_NotBeValid_When_AccountDoesntExist() =>
         await MediatorTest(async (mediator, services) =>
         {
             // Arrange
             var command = await Prepare(services, mediator);
-            command.ApplicationId = Guid.NewGuid().ToString();
+            command.AccountId = Guid.NewGuid().ToString();
             var validator = new CreateCommand.CommandValidator(services);
 
             // Act
@@ -56,7 +56,7 @@ public class CreateCommandTests : TestBase
 
             // Assert
             Assert.False(response.IsValid);
-            Assert.Contains(response.Errors, error => error.PropertyName == nameof(CreateCommand.Command.ApplicationId)
+            Assert.Contains(response.Errors, error => error.PropertyName == nameof(CreateCommand.Command.AccountId)
                 && error.ErrorCode == nameof(ErrorCodes.MisingRoleForAccount));
         });
 
@@ -222,23 +222,10 @@ public class CreateCommandTests : TestBase
                 && error.ErrorCode == "NotEmptyValidator");
         });
 
-    private async Task<string> CreateApplication(IMediator mediator, string accountId)
-    {
-        var result = await mediator.Send(new Gomsle.Api.Features.Application.CreateCommand.Command
-        {
-            AccountId = accountId,
-            AutoProvision = true,
-            EnableProvision = true,
-            DisplayName = "Microsoft Azure AD Application",
-        });
-
-        return result.Result!.Id!;
-    }
-
-    private CreateCommand.Command GetValidCommand(string applicationId)
+    private CreateCommand.Command GetValidCommand(string accountId)
         => new CreateCommand.Command
         {
-            ApplicationId = applicationId,
+            AccountId = accountId,
             AuthorityUrl = "https://microsoft.com",
             ClientId = "microsoft-internal-azure-id-client",
             ClientSecret = "microsoft-internal-azure-id-client.secret",
@@ -257,7 +244,6 @@ public class CreateCommandTests : TestBase
         {
             { user.Id, AccountRole.Owner },
         });
-        var applicationId = await CreateApplication(mediator, account.Id);
-        return GetValidCommand(applicationId);
+        return GetValidCommand(account.Id);
     }
 }

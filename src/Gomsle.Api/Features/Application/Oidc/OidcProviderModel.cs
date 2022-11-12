@@ -7,7 +7,7 @@ namespace Gomsle.Api.Features.Application.Oidc;
 public class OidcProviderModel
 {
     public string Id { get; set; } = Guid.NewGuid().ToString();
-    public string? ApplicationId { get; set; }
+    public string? AccountId { get; set; }
     public string? Name { get; set; }
     public string? AuthorityUrl { get; set; }
     public string? ClientId { get; set; }

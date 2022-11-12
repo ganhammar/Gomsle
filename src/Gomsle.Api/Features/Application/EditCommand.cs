@@ -80,6 +80,7 @@ public class EditCommand
 
             applicationConfiguration.AutoProvision = request.AutoProvision!.Value;
             applicationConfiguration.EnableProvision = request.EnableProvision!.Value;
+            applicationConfiguration.ConnectedOidcProviders = request.ConnectedOidcProviders;
 
             var origins = await SaveOrigins(request, cancellationToken);
             await _dbContext.SaveAsync(application);

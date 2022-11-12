@@ -12,7 +12,7 @@ namespace Gomsle.Api.Tests.Features.Application.Oidc;
 public class DeleteCommandTests : TestBase
 {
     [Fact]
-    public async Task Should_DeleteApplication_When_RequestIsValid() =>
+    public async Task Should_DeleteProvider_When_RequestIsValid() =>
         await MediatorTest(async (mediator, services) =>
         {
             // Arrange
@@ -61,24 +61,11 @@ public class DeleteCommandTests : TestBase
                 && error.ErrorCode == nameof(ErrorCodes.NotAuthorized));
         });
 
-    private async Task<string> CreateApplication(IMediator mediator, string accountId)
-    {
-        var result = await mediator.Send(new Gomsle.Api.Features.Application.CreateCommand.Command
-        {
-            AccountId = accountId,
-            AutoProvision = true,
-            EnableProvision = true,
-            DisplayName = "Microsoft Azure AD Application",
-        });
-
-        return result.Result!.Id!;
-    }
-
-    private async Task<string> CreateOidcProvider(IMediator mediator, string applicationId)
+    private async Task<string> CreateOidcProvider(IMediator mediator, string accountId)
     {
         var result = await mediator.Send(new CreateCommand.Command
         {
-            ApplicationId = applicationId,
+            AccountId = accountId,
             AuthorityUrl = "https://microsoft.com",
             ClientId = "microsoft-internal-azure-id-client",
             ClientSecret = "microsoft-internal-azure-id-client.secret",
@@ -106,8 +93,7 @@ public class DeleteCommandTests : TestBase
         {
             { user.Id, AccountRole.Owner },
         });
-        var applicationId = await CreateApplication(mediator, account.Id);
-        var oidcProviderId = await CreateOidcProvider(mediator, applicationId);
+        var oidcProviderId = await CreateOidcProvider(mediator, account.Id);
         return GetValidCommand(oidcProviderId);
     }
 }

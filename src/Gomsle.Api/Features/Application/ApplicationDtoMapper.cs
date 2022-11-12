@@ -23,5 +23,6 @@ public static class ApplicationDtoMapper
                 .ToList(),
             PostLogoutRedirectUris = application.PostLogoutRedirectUris,
             RedirectUris = application.RedirectUris,
+            ConnectedOidcProviders = applicationConfiguration.ConnectedOidcProviders,
         };
 }

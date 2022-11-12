@@ -37,6 +37,18 @@ public class ApplicationSetup
 
         var applicationOidcProvidersGlobalSecondaryIndexes = new List<GlobalSecondaryIndex>
         {
+            new GlobalSecondaryIndex
+            {
+                IndexName = "AccountId-index",
+                KeySchema = new List<KeySchemaElement>
+                {
+                    new KeySchemaElement("AccountId", KeyType.HASH),
+                },
+                Projection = new Projection
+                {
+                    ProjectionType = ProjectionType.ALL,
+                },
+            },
         };
 
         var tableNames = await database.ListTablesAsync(cancellationToken);
@@ -200,6 +212,11 @@ public class ApplicationSetup
                 new AttributeDefinition
                 {
                     AttributeName = "Id",
+                    AttributeType = ScalarAttributeType.S,
+                },
+                new AttributeDefinition
+                {
+                    AttributeName = "AccountId",
                     AttributeType = ScalarAttributeType.S,
                 },
             },

@@ -1,6 +1,6 @@
 namespace Gomsle.Api.Features.Application.Oidc;
 
-public class OidcProviderBaseInput
+public abstract class OidcProviderBaseInput
 {
     public string? Name { get; set; }
     public string? AuthorityUrl { get; set; }

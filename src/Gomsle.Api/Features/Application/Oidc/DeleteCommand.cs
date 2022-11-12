@@ -33,17 +33,9 @@ public class DeleteCommand
                         return false;
                     }
 
-                    var applicationConfiguration = await dbContext.LoadAsync<ApplicationConfigurationModel>(
-                        oidcProvider.ApplicationId, cancellationToken);
-
-                    if (applicationConfiguration == default)
-                    {
-                        return false;
-                    }
-
                     return await HasRoleForAccount.Validate(
                         services,
-                        applicationConfiguration.AccountId,
+                        oidcProvider.AccountId,
                         new[] { AccountRole.Administrator, AccountRole.Owner },
                         cancellationToken);
                 })

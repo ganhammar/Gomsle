@@ -1,5 +1,3 @@
-using Gomsle.Api.Features.Application.Oidc;
-
 namespace Gomsle.Api.Features.Application;
 
 public class ApplicationDto
@@ -14,4 +12,5 @@ public class ApplicationDto
     public bool EnableProvision { get; set; }
     public string? DefaultOrigin { get; set; }
     public List<string> Origins { get; set; } = new();
+    public List<string> ConnectedOidcProviders { get; set; } = new();
 }
