@@ -1,25 +1,24 @@
+using Amazon.DynamoDBv2;
+using Amazon.DynamoDBv2.DataModel;
 using Gomsle.Api.Features.Account;
+using Gomsle.Api.Features.Application;
 using Gomsle.Api.Infrastructure.Validators;
 using Gomsle.Api.Tests.Infrastructure;
+using MediatR;
+using Microsoft.Extensions.DependencyInjection;
 using Xunit;
-using CreateCommand = Gomsle.Api.Features.Application.CreateCommand;
 
 namespace Gomsle.Api.Tests.Features.Application;
 
 [Collection("Sequential")]
-public class CreateCommandTests : TestBase
+public class EditCommandTests : TestBase
 {
     [Fact]
-    public async Task Should_CreateApplication_When_RequestIsValid() =>
+    public async Task Should_EditApplication_When_RequestIsValid() =>
         await MediatorTest(async (mediator, services) =>
         {
             // Arrange
-            var user = await CreateAndLoginValidUser(services);
-            var account = await CreateAccount(services, new()
-            {
-                { user.Id, AccountRole.Owner },
-            });
-            var command = GetValidCommand(account.Id);
+            var command = await Prepare(services, mediator);
 
             // Act
             var response = await mediator.Send(command);
@@ -29,7 +28,7 @@ public class CreateCommandTests : TestBase
         });
 
     [Fact]
-    public async Task Should_CreateApplication_When_MinimumRequestIsValid() =>
+    public async Task Should_EditApplication_When_MinimumRequirementsIsSet() =>
         await MediatorTest(async (mediator, services) =>
         {
             // Arrange
@@ -38,9 +37,10 @@ public class CreateCommandTests : TestBase
             {
                 { user.Id, AccountRole.Owner },
             });
-            var command = new CreateCommand.Command
+            var applicationId = await CreateApplication(mediator, account.Id);
+            var command = new EditCommand.Command
             {
-                AccountId = account.Id,
+                Id = applicationId,
                 AutoProvision = true,
                 EnableProvision = true,
                 DisplayName = "Microsoft Azure AD Application",
@@ -51,8 +51,12 @@ public class CreateCommandTests : TestBase
 
             // Assert
             Assert.True(response.IsValid);
+            Assert.Empty(response.Result!.Origins);
+            Assert.Empty(response.Result!.RedirectUris);
+            Assert.Empty(response.Result!.PostLogoutRedirectUris);
         });
 
+    
     [Fact]
     public async Task Should_NotBeValid_When_UserIsntAuthorized() =>
         await MediatorTest(async (mediator, services) =>
@@ -61,18 +65,28 @@ public class CreateCommandTests : TestBase
             var user = await CreateAndLoginValidUser(services);
             var account = await CreateAccount(services, new()
             {
-                { user.Id, AccountRole.Reader },
+                { user.Id, AccountRole.Owner },
             });
-            var command = GetValidCommand(account.Id);
-            var validator = new CreateCommand.CommandValidator(services);
+            var applicationId = await CreateApplication(mediator, account.Id);
+
+            var database = services.GetRequiredService<IAmazonDynamoDB>();
+            var context = new DynamoDBContext(database);
+            account.Members = new()
+            {
+                { user.Id, AccountRole.Reader },
+            };
+            await context.SaveAsync(account);
+
+            var command = GetValidCommand(applicationId);
+            var validator = new EditCommand.CommandValidator(services);
 
             // Act
             var response = await validator.ValidateAsync(command);
 
             // Assert
             Assert.False(response.IsValid);
-            Assert.Contains(response.Errors, error => error.PropertyName == nameof(CreateCommand.Command.AccountId)
-                && error.ErrorCode == nameof(ErrorCodes.MisingRoleForAccount));
+            Assert.Contains(response.Errors, error => error.PropertyName == nameof(EditCommand.Command.Id)
+                && error.ErrorCode == nameof(ErrorCodes.NotAuthorized));
         });
 
     [Fact]
@@ -80,21 +94,16 @@ public class CreateCommandTests : TestBase
         await MediatorTest(async (mediator, services) =>
         {
             // Arrange
-            var user = await CreateAndLoginValidUser(services);
-            var account = await CreateAccount(services, new()
-            {
-                { user.Id, AccountRole.Reader },
-            });
-            var command = GetValidCommand(account.Id);
+            var command = await Prepare(services, mediator);
             command.AutoProvision = default;
-            var validator = new CreateCommand.CommandValidator(services);
+            var validator = new EditCommand.CommandValidator(services);
 
             // Act
             var response = await validator.ValidateAsync(command);
 
             // Assert
             Assert.False(response.IsValid);
-            Assert.Contains(response.Errors, error => error.PropertyName == nameof(CreateCommand.Command.AutoProvision)
+            Assert.Contains(response.Errors, error => error.PropertyName == nameof(EditCommand.Command.AutoProvision)
                 && error.ErrorCode == "NotEmptyValidator");
         });
 
@@ -103,21 +112,16 @@ public class CreateCommandTests : TestBase
         await MediatorTest(async (mediator, services) =>
         {
             // Arrange
-            var user = await CreateAndLoginValidUser(services);
-            var account = await CreateAccount(services, new()
-            {
-                { user.Id, AccountRole.Reader },
-            });
-            var command = GetValidCommand(account.Id);
+            var command = await Prepare(services, mediator);
             command.EnableProvision = default;
-            var validator = new CreateCommand.CommandValidator(services);
+            var validator = new EditCommand.CommandValidator(services);
 
             // Act
             var response = await validator.ValidateAsync(command);
 
             // Assert
             Assert.False(response.IsValid);
-            Assert.Contains(response.Errors, error => error.PropertyName == nameof(CreateCommand.Command.EnableProvision)
+            Assert.Contains(response.Errors, error => error.PropertyName == nameof(EditCommand.Command.EnableProvision)
                 && error.ErrorCode == "NotEmptyValidator");
         });
 
@@ -126,21 +130,16 @@ public class CreateCommandTests : TestBase
         await MediatorTest(async (mediator, services) =>
         {
             // Arrange
-            var user = await CreateAndLoginValidUser(services);
-            var account = await CreateAccount(services, new()
-            {
-                { user.Id, AccountRole.Reader },
-            });
-            var command = GetValidCommand(account.Id);
+            var command = await Prepare(services, mediator);
             command.DisplayName = default;
-            var validator = new CreateCommand.CommandValidator(services);
+            var validator = new EditCommand.CommandValidator(services);
 
             // Act
             var response = await validator.ValidateAsync(command);
 
             // Assert
             Assert.False(response.IsValid);
-            Assert.Contains(response.Errors, error => error.PropertyName == nameof(CreateCommand.Command.DisplayName)
+            Assert.Contains(response.Errors, error => error.PropertyName == nameof(EditCommand.Command.DisplayName)
                 && error.ErrorCode == "NotEmptyValidator");
         });
 
@@ -149,21 +148,16 @@ public class CreateCommandTests : TestBase
         await MediatorTest(async (mediator, services) =>
         {
             // Arrange
-            var user = await CreateAndLoginValidUser(services);
-            var account = await CreateAccount(services, new()
-            {
-                { user.Id, AccountRole.Reader },
-            });
-            var command = GetValidCommand(account.Id);
+            var command = await Prepare(services, mediator);
             command.Origins.Add(command.DefaultOrigin!);
-            var validator = new CreateCommand.CommandValidator(services);
+            var validator = new EditCommand.CommandValidator(services);
 
             // Act
             var response = await validator.ValidateAsync(command);
 
             // Assert
             Assert.False(response.IsValid);
-            Assert.Contains(response.Errors, error => error.PropertyName == nameof(CreateCommand.Command.Origins)
+            Assert.Contains(response.Errors, error => error.PropertyName == nameof(EditCommand.Command.Origins)
                 && error.ErrorCode == nameof(ErrorCodes.DuplicateOrigin));
         });
 
@@ -172,21 +166,16 @@ public class CreateCommandTests : TestBase
         await MediatorTest(async (mediator, services) =>
         {
             // Arrange
-            var user = await CreateAndLoginValidUser(services);
-            var account = await CreateAccount(services, new()
-            {
-                { user.Id, AccountRole.Reader },
-            });
-            var command = GetValidCommand(account.Id);
+            var command = await Prepare(services, mediator);
             command.RedirectUris.Add("not-a-valid-uri");
-            var validator = new CreateCommand.CommandValidator(services);
+            var validator = new EditCommand.CommandValidator(services);
 
             // Act
             var response = await validator.ValidateAsync(command);
 
             // Assert
             Assert.False(response.IsValid);
-            Assert.Contains(response.Errors, error => error.PropertyName.Contains(nameof(CreateCommand.Command.RedirectUris))
+            Assert.Contains(response.Errors, error => error.PropertyName.Contains(nameof(EditCommand.Command.RedirectUris))
                 && error.ErrorCode == nameof(ErrorCodes.InvalidUri));
         });
 
@@ -195,21 +184,16 @@ public class CreateCommandTests : TestBase
         await MediatorTest(async (mediator, services) =>
         {
             // Arrange
-            var user = await CreateAndLoginValidUser(services);
-            var account = await CreateAccount(services, new()
-            {
-                { user.Id, AccountRole.Reader },
-            });
-            var command = GetValidCommand(account.Id);
+            var command = await Prepare(services, mediator);
             command.PostLogoutRedirectUris.Add("not-a-valid-uri");
-            var validator = new CreateCommand.CommandValidator(services);
+            var validator = new EditCommand.CommandValidator(services);
 
             // Act
             var response = await validator.ValidateAsync(command);
 
             // Assert
             Assert.False(response.IsValid);
-            Assert.Contains(response.Errors, error => error.PropertyName.Contains(nameof(CreateCommand.Command.PostLogoutRedirectUris))
+            Assert.Contains(response.Errors, error => error.PropertyName.Contains(nameof(EditCommand.Command.PostLogoutRedirectUris))
                 && error.ErrorCode == nameof(ErrorCodes.InvalidUri));
         });
 
@@ -218,21 +202,16 @@ public class CreateCommandTests : TestBase
         await MediatorTest(async (mediator, services) =>
         {
             // Arrange
-            var user = await CreateAndLoginValidUser(services);
-            var account = await CreateAccount(services, new()
-            {
-                { user.Id, AccountRole.Reader },
-            });
-            var command = GetValidCommand(account.Id);
+            var command = await Prepare(services, mediator);
             command.Origins.Add("not-a-valid-uri");
-            var validator = new CreateCommand.CommandValidator(services);
+            var validator = new EditCommand.CommandValidator(services);
 
             // Act
             var response = await validator.ValidateAsync(command);
 
             // Assert
             Assert.False(response.IsValid);
-            Assert.Contains(response.Errors, error => error.PropertyName.Contains(nameof(CreateCommand.Command.Origins))
+            Assert.Contains(response.Errors, error => error.PropertyName.Contains(nameof(EditCommand.Command.Origins))
                 && error.ErrorCode == nameof(ErrorCodes.InvalidUri));
         });
 
@@ -241,21 +220,16 @@ public class CreateCommandTests : TestBase
         await MediatorTest(async (mediator, services) =>
         {
             // Arrange
-            var user = await CreateAndLoginValidUser(services);
-            var account = await CreateAccount(services, new()
-            {
-                { user.Id, AccountRole.Reader },
-            });
-            var command = GetValidCommand(account.Id);
+            var command = await Prepare(services, mediator);
             command.DefaultOrigin = "not-a-valid-uri";
-            var validator = new CreateCommand.CommandValidator(services);
+            var validator = new EditCommand.CommandValidator(services);
 
             // Act
             var response = await validator.ValidateAsync(command);
 
             // Assert
             Assert.False(response.IsValid);
-            Assert.Contains(response.Errors, error => error.PropertyName == nameof(CreateCommand.Command.DefaultOrigin)
+            Assert.Contains(response.Errors, error => error.PropertyName == nameof(EditCommand.Command.DefaultOrigin)
                 && error.ErrorCode == nameof(ErrorCodes.InvalidUri));
         });
 
@@ -264,26 +238,22 @@ public class CreateCommandTests : TestBase
         await MediatorTest(async (mediator, services) =>
         {
             // Arrange
-            var user = await CreateAndLoginValidUser(services);
-            var account = await CreateAccount(services, new()
-            {
-                { user.Id, AccountRole.Reader },
-            });
-            var command = GetValidCommand(account.Id);
+            var command = await Prepare(services, mediator);
             command.DefaultOrigin = default;
-            var validator = new CreateCommand.CommandValidator(services);
+            var validator = new EditCommand.CommandValidator(services);
 
             // Act
             var response = await validator.ValidateAsync(command);
 
             // Assert
             Assert.False(response.IsValid);
-            Assert.Contains(response.Errors, error => error.PropertyName == nameof(CreateCommand.Command.Origins)
+            Assert.Contains(response.Errors, error => error.PropertyName == nameof(EditCommand.Command.Origins)
                 && error.ErrorCode == "EmptyValidator");
         });
 
-    private CreateCommand.Command GetValidCommand(string accountId)
-        => new CreateCommand.Command
+    private async Task<string> CreateApplication(IMediator mediator, string accountId)
+    {
+        var result = await mediator.Send(new Gomsle.Api.Features.Application.CreateCommand.Command
         {
             AccountId = accountId,
             AutoProvision = true,
@@ -304,5 +274,44 @@ public class CreateCommandTests : TestBase
                 "https://microsoft.com/logout/callback",
                 "https://microsoft.se/logout/callback",
             },
+        });
+
+        return result.Result!.Id!;
+    }
+
+    private EditCommand.Command GetValidCommand(string id)
+        => new EditCommand.Command
+        {
+            Id = id,
+            AutoProvision = true,
+            EnableProvision = true,
+            DefaultOrigin = "https://microsoft.com",
+            DisplayName = "Microsoft Azure AD Application",
+            Origins = new()
+            {
+                "https://microsoft.se",
+            },
+            RedirectUris = new()
+            {
+                "https://microsoft.com/login/callback",
+                "https://microsoft.se/login/callback",
+            },
+            PostLogoutRedirectUris = new()
+            {
+                "https://microsoft.com/logout/callback",
+                "https://microsoft.se/logout/callback",
+            },
         };
+
+    private async Task<EditCommand.Command> Prepare(
+        IServiceProvider services, IMediator mediator)
+    {
+        var user = await CreateAndLoginValidUser(services);
+        var account = await CreateAccount(services, new()
+        {
+            { user.Id, AccountRole.Owner },
+        });
+        var applicationId = await CreateApplication(mediator, account.Id);
+        return GetValidCommand(applicationId);
+    }
 }

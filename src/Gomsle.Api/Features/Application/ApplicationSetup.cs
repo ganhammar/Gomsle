@@ -21,10 +21,6 @@ public class ApplicationSetup
 
         var applicationOriginsGlobalSecondaryIndexes = new List<GlobalSecondaryIndex>
         {
-        };
-
-        var applicationOidcProvidersGlobalSecondaryIndexes = new List<GlobalSecondaryIndex>
-        {
             new GlobalSecondaryIndex
             {
                 IndexName = "ApplicationId-index",
@@ -37,6 +33,10 @@ public class ApplicationSetup
                     ProjectionType = ProjectionType.ALL,
                 },
             },
+        };
+
+        var applicationOidcProvidersGlobalSecondaryIndexes = new List<GlobalSecondaryIndex>
+        {
         };
 
         var tableNames = await database.ListTablesAsync(cancellationToken);

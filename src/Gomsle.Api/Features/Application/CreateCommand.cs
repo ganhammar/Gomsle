@@ -12,16 +12,9 @@ namespace Gomsle.Api.Features.Application;
 
 public class CreateCommand
 {
-    public class Command : IRequest<IResponse<ApplicationDto>>
+    public class Command : ApplicationBaseInput, IRequest<IResponse<ApplicationDto>>
     {
         public string? AccountId { get; set; }
-        public string? DisplayName { get; set; }
-        public bool? AutoProvision { get; set; }
-        public bool? EnableProvision { get; set; }
-        public List<string> RedirectUris { get; set; } = new();
-        public List<string> PostLogoutRedirectUris { get; set; } = new();
-        public string? DefaultOrigin { get; set; }
-        public List<string> Origins { get; set; } = new();
     }
 
     public class CommandValidator : AbstractValidator<Command>
@@ -34,41 +27,8 @@ public class CreateCommand
                 .IsAuthenticated(services)
                 .HasRoleForAccount(services, AccountRole.Administrator, AccountRole.Owner);
 
-            RuleFor(x => x.DisplayName)
-                .NotEmpty();
-
-            RuleFor(x => x.AutoProvision)
-                .NotEmpty();
-
-            RuleFor(x => x.EnableProvision)
-                .NotEmpty();
-
-            RuleForEach(x => x.RedirectUris)
-                .IsUri();
-
-            RuleForEach(x => x.PostLogoutRedirectUris)
-                .IsUri();
-
-            RuleFor(x => x.DefaultOrigin)
-                .IsUri()
-                .When(x => string.IsNullOrEmpty(x.DefaultOrigin) == false);
-
-            When(x => x.DefaultOrigin == default, () =>
-            {
-                RuleFor(x => x.Origins)
-                    .Empty();
-            });
-
-            When(x => x.Origins?.Any() == true, () =>
-            {
-                RuleForEach(x => x.Origins)
-                    .IsUri();
-                
-                RuleFor(x => x.Origins)
-                    .Must((command, origins) => origins.Contains(command.DefaultOrigin!) == false)
-                    .WithErrorCode(nameof(ErrorCodes.DuplicateOrigin))
-                    .WithMessage(ErrorCodes.DuplicateOrigin);
-            });
+            RuleFor(x => x)
+                .SetValidator(new ApplicationBaseInputValidator(services));
         }
     }
 
@@ -141,7 +101,7 @@ public class CreateCommand
             await _dbContext.SaveAsync(applicationConfiguration);
             var origins = await SaveOrigins(request, application.Id, cancellationToken);
 
-            return Response(ApplicationDtoMapper.ToDto(application, applicationConfiguration, origins, new()));
+            return Response(ApplicationDtoMapper.ToDto(application, applicationConfiguration, origins));
         }
 
         private async Task<List<ApplicationOriginModel>> SaveOrigins(Command request, string applicationId, CancellationToken cancellationToken)
