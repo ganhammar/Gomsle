@@ -3,7 +3,7 @@ using Gomsle.Api.Infrastructure.Validators;
 using Gomsle.Api.Tests.Infrastructure;
 using Xunit;
 using CreateCommand = Gomsle.Api.Features.Application.CreateCommand;
-using CreateOidcProviderCommand = Gomsle.Api.Features.Application.Oidc.CreateCommand;
+using CreateOidcProviderCommand = Gomsle.Api.Features.OidcProvider.CreateCommand;
 
 namespace Gomsle.Api.Tests.Features.Application;
 

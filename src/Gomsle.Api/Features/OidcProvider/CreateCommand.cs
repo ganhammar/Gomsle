@@ -6,7 +6,7 @@ using Gomsle.Api.Infrastructure;
 using Gomsle.Api.Infrastructure.Validators;
 using MediatR;
 
-namespace Gomsle.Api.Features.Application.Oidc;
+namespace Gomsle.Api.Features.OidcProvider;
 
 public class CreateCommand
 {

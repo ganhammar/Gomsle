@@ -1,4 +1,4 @@
-namespace Gomsle.Api.Features.Application.Oidc;
+namespace Gomsle.Api.Features.OidcProvider;
 
 public abstract class OidcProviderBaseInput
 {

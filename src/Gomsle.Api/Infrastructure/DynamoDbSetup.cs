@@ -2,6 +2,7 @@ using Amazon.DynamoDBv2;
 using AspNetCore.Identity.AmazonDynamoDB;
 using Gomsle.Api.Features.Account;
 using Gomsle.Api.Features.Application;
+using Gomsle.Api.Features.OidcProvider;
 using OpenIddict.AmazonDynamoDB;
 
 namespace Gomsle.Api.Infrastructure;
@@ -21,6 +22,7 @@ public static class DynamoDbSetup
         {
             AccountSetup.EnsureInitializedAsync(database),
             ApplicationSetup.EnsureInitializedAsync(database),
+            OidcProviderSetup.EnsureInitializedAsync(database),
         };
 
         Task.WhenAll(promises).GetAwaiter().GetResult();

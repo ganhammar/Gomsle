@@ -2,7 +2,7 @@ using Amazon.DynamoDBv2;
 using Amazon.DynamoDBv2.DataModel;
 using Amazon.DynamoDBv2.DocumentModel;
 using FluentValidation;
-using Gomsle.Api.Features.Application.Oidc;
+using Gomsle.Api.Features.OidcProvider;
 using Gomsle.Api.Infrastructure.Validators;
 
 namespace Gomsle.Api.Features.Application;

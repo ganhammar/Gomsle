@@ -1,9 +1,9 @@
 using System.Text.Json.Serialization;
 using Amazon.DynamoDBv2.DataModel;
 
-namespace Gomsle.Api.Features.Application.Oidc;
+namespace Gomsle.Api.Features.OidcProvider;
 
-[DynamoDBTable(ApplicationSetup.ApplicationOidcProvidersTableName)]
+[DynamoDBTable(OidcProviderSetup.OidcProvidersTableName)]
 public class OidcProviderModel
 {
     public string Id { get; set; } = Guid.NewGuid().ToString();

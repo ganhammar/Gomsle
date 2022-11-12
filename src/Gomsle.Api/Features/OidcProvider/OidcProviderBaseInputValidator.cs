@@ -2,7 +2,7 @@ using FluentValidation;
 using Gomsle.Api.Infrastructure.Validators;
 using static OpenIddict.Abstractions.OpenIddictConstants;
 
-namespace Gomsle.Api.Features.Application.Oidc;
+namespace Gomsle.Api.Features.OidcProvider;
 
 public class OidcProviderBaseInputValidator : AbstractValidator<OidcProviderBaseInput>
 {

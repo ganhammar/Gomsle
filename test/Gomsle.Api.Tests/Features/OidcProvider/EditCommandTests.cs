@@ -3,10 +3,10 @@ using Gomsle.Api.Infrastructure.Validators;
 using Gomsle.Api.Tests.Infrastructure;
 using MediatR;
 using Xunit;
-using CreateCommand = Gomsle.Api.Features.Application.Oidc.CreateCommand;
-using EditCommand = Gomsle.Api.Features.Application.Oidc.EditCommand;
+using CreateCommand = Gomsle.Api.Features.OidcProvider.CreateCommand;
+using EditCommand = Gomsle.Api.Features.OidcProvider.EditCommand;
 
-namespace Gomsle.Api.Tests.Features.Application.Oidc;
+namespace Gomsle.Api.Tests.Features.OidcProvider;
 
 [Collection("Sequential")]
 public class EditCommandTests : TestBase

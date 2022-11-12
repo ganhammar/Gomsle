@@ -1,12 +1,12 @@
 using Gomsle.Api.Features.Account;
-using Gomsle.Api.Features.Application.Oidc;
+using Gomsle.Api.Features.OidcProvider;
 using Gomsle.Api.Infrastructure.Validators;
 using Gomsle.Api.Tests.Infrastructure;
 using MediatR;
 using Xunit;
-using CreateCommand = Gomsle.Api.Features.Application.Oidc.CreateCommand;
+using CreateCommand = Gomsle.Api.Features.OidcProvider.CreateCommand;
 
-namespace Gomsle.Api.Tests.Features.Application.Oidc;
+namespace Gomsle.Api.Tests.Features.OidcProvider;
 
 [Collection("Sequential")]
 public class DeleteCommandTests : TestBase

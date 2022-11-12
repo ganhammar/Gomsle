@@ -6,11 +6,11 @@ using Gomsle.Api.Infrastructure;
 using Gomsle.Api.Infrastructure.Validators;
 using MediatR;
 
-namespace Gomsle.Api.Features.Application.Oidc;
+namespace Gomsle.Api.Features.OidcProvider;
 
-public class DeleteCommand
+public class EditCommand
 {
-    public class Command : IRequest<IResponse>
+    public class Command : OidcProviderBaseInput, IRequest<IResponse<OidcProviderModel>>
     {
         public string? Id { get; set; }
     }
@@ -19,6 +19,9 @@ public class DeleteCommand
     {
         public CommandValidator(IServiceProvider services)
         {
+            RuleFor(x => x)
+                .SetValidator(new OidcProviderBaseInputValidator(services));
+
             RuleFor(x => x.Id)
                 .Cascade(CascadeMode.Stop)
                 .NotEmpty()
@@ -44,7 +47,7 @@ public class DeleteCommand
         }
     }
 
-    public class CommandHandler : Handler<Command, IResponse>
+    public class CommandHandler : Handler<Command, IResponse<OidcProviderModel>>
     {
         private readonly DynamoDBContext _dbContext;
 
@@ -53,12 +56,28 @@ public class DeleteCommand
             _dbContext = new DynamoDBContext(database);
         }
 
-        public override async Task<IResponse> Handle(
+        public override async Task<IResponse<OidcProviderModel>> Handle(
             Command request, CancellationToken cancellationToken)
         {
-            await _dbContext.DeleteAsync<OidcProviderModel>(request.Id, cancellationToken);
+            var oidcProvider = await _dbContext.LoadAsync<OidcProviderModel>(request.Id);
 
-            return Response();
+            oidcProvider.AuthorityUrl = request.AuthorityUrl;
+            oidcProvider.ClientId = request.ClientId;
+            oidcProvider.IsDefault = request.IsDefault!.Value;
+            oidcProvider.IsVisible = request.IsVisible!.Value;
+            oidcProvider.Name = request.Name;
+            oidcProvider.RequiredDomains = request.RequiredDomains;
+            oidcProvider.ResponseType = request.ResponseType;
+            oidcProvider.Scopes = request.Scopes;
+
+            if (request.ClientSecret != default)
+            {
+                oidcProvider.ClientSecret = request.ClientSecret;
+            }
+
+            await _dbContext.SaveAsync(oidcProvider);
+
+            return Response(oidcProvider);
         }
     }
 }

@@ -7,7 +7,7 @@ using Gomsle.Api.Tests.Infrastructure;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit;
-using CreateOidcProviderCommand = Gomsle.Api.Features.Application.Oidc.CreateCommand;
+using CreateOidcProviderCommand = Gomsle.Api.Features.OidcProvider.CreateCommand;
 
 namespace Gomsle.Api.Tests.Features.Application;
 
