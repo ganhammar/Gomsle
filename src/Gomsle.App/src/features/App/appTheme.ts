@@ -7,17 +7,29 @@ export const appTheme: DefaultTheme = {
       black: '#222222',
       white: '#f9f9f9',
     },
-    primary: {
+    background: {
       main: '#eee',
       contrastText: '#222222',
     },
+    primary: {
+      main: '#5e50a1',
+      contrastText: '#f9f9f9',
+    },
     secondary: {
-      main: '#f9f9f9',
+      main: '#eb5187',
       contrastText: '#222222',
     },
     divider: {
       main: '#bbb',
       contrastText: '#222222',
+    },
+    warning: {
+      main: '#e52129',
+      contrastText: '#f9f9f9',
+    },
+    success: {
+      main: '#41a949',
+      contrastText: '#f9f9f9',
     },
   },
   typography: {

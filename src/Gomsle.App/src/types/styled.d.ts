@@ -14,9 +14,12 @@ declare module 'styled-components' {
         black: string;
         white: string;
       };
+      background: IPalette;
       primary: IPalette;
       secondary: IPalette;
       divider: IPalette;
+      success: IPalette;
+      warning: IPalette;
     };
     typography: {
       fontFamily: string;

@@ -7,7 +7,7 @@ const GlobalStyle = createGlobalStyle`
     box-sizing: border-box;
     margin: 0;
     padding: 0;
-    color: ${({ theme }) => theme.palette.primary.contrastText};
+    color: ${({ theme }) => theme.palette.background.contrastText};
     font-family: ${({ theme }) => theme.typography.fontFamily};
     font-size: ${({ theme }) => theme.typography.fontSize};
     line-height: ${({ theme }) => theme.typography.lineHeight};
@@ -17,7 +17,7 @@ const GlobalStyle = createGlobalStyle`
     -moz-osx-font-smoothing: grayscale;
   }
   body {
-    background: ${({ theme }) => theme.palette.primary.main};
+    background: ${({ theme }) => theme.palette.background.main};
   }
   h1 {
     font-size: ${({ theme }) => theme.typography.h1};
@@ -31,15 +31,15 @@ const GlobalStyle = createGlobalStyle`
 `;
 
 const App = styled.div`
-  width: 1024px;
+  width: 800px;
   padding: 2rem;
   font-weight: normal;
   margin: 0 auto;
 `;
 
-type Props = {
+interface Props {
   children: ReactNode;
-};
+}
 
 export function Layout({ children }: Props) {
   return (
