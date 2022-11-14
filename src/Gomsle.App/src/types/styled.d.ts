@@ -15,6 +15,7 @@ declare module 'styled-components' {
         white: string;
       };
       background: IPalette;
+      backgroundHighlight: IPalette;
       primary: IPalette;
       secondary: IPalette;
       divider: IPalette;
@@ -28,6 +29,19 @@ declare module 'styled-components' {
       h1: string;
       h2: string;
       h3: string;
-    }
+    };
+    spacing: {
+      xs: string;
+      s: string;
+      m: string;
+      l: string;
+      xl: string;
+    };
+    shadows: [
+      string,
+      string,
+      string,
+      string,
+    ];
   }
 }

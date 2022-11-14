@@ -35,6 +35,8 @@ const App = styled.div`
   padding: 2rem;
   font-weight: normal;
   margin: 0 auto;
+  display: flex;
+  flex-direction: column;
 `;
 
 interface Props {

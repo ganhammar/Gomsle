@@ -11,17 +11,21 @@ export const appTheme: DefaultTheme = {
       main: '#eee',
       contrastText: '#222222',
     },
+    backgroundHighlight: {
+      main: '#f9f9f9',
+      contrastText: '#333333',
+    },
     primary: {
       main: '#5e50a1',
       contrastText: '#f9f9f9',
     },
     secondary: {
-      main: '#eb5187',
-      contrastText: '#222222',
+      main: '#9e2168',
+      contrastText: '#f9f9f9',
     },
     divider: {
       main: '#bbb',
-      contrastText: '#222222',
+      contrastText: '#fff',
     },
     warning: {
       main: '#e52129',
@@ -40,4 +44,17 @@ export const appTheme: DefaultTheme = {
     h2: '2.5rem',
     h3: '2rem',
   },
+  spacing: {
+    xs: '4px',
+    s: '8px',
+    m: '16px',
+    l: '24px',
+    xl: '40px',
+  },
+  shadows: [
+    'none',
+    'rgb(0 0 0 / 25%) 0px 2px 1px -1px, rgb(0 0 0 / 19%) 0px 1px 1px 0px, rgb(0 0 0 / 17%) 0px 1px 3px 0px;',
+    'rgb(0 0 0 / 25%) 0px 3px 1px -2px, rgb(0 0 0 / 19%) 0px 2px 2px 0px, rgb(0 0 0 / 17%) 0px 1px 5px 0px;',
+    'rgb(0 0 0 / 25%) 0px 3px 3px -2px, rgb(0 0 0 / 19%) 0px 3px 4px 0px, rgb(0 0 0 / 17%) 0px 1px 8px 0px;',
+  ],
 };

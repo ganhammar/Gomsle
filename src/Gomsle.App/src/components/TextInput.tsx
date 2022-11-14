@@ -11,7 +11,7 @@ const Fieldset = styled.fieldset<TextInputStyleProps>`
   border: none;
   position: relative;
   height: 3.2rem;
-  margin-bottom: 1rem;
+  margin-bottom: 1.8rem;
   &:after {
     content: '';
     height: 3px;
@@ -19,9 +19,8 @@ const Fieldset = styled.fieldset<TextInputStyleProps>`
     position: absolute;
     bottom: 0;
     left: 0;
-    background-color: ${({ theme: { palette }, hasError }) => hasError
-      ? palette.warning.main
-      : palette.primary.main};
+    background-color: ${({ theme: { palette }, hasError }) =>
+      hasError ? palette.warning.main : palette.primary.main};
     z-index: 1;
     transition: width 0.5s, background-color 0.5s;
   }
@@ -35,7 +34,7 @@ const Fieldset = styled.fieldset<TextInputStyleProps>`
 `;
 const Label = styled.label<TextInputStyleProps>`
   position: absolute;
-  left: 4px;
+  left: ${({ theme }) => theme.spacing.xs};
   top: 24px;
   transition: top 0.5s, font-size 0.5s;
   ${({ isFocused, hasValue }) =>
@@ -47,9 +46,9 @@ const Label = styled.label<TextInputStyleProps>`
 `;
 const Input = styled.input<TextInputStyleProps>`
   border: none;
-  border-bottom: 1px solid ${({ theme: { palette }, hasError }) => hasError
-    ? palette.warning.main
-    : palette.divider.main};
+  border-bottom: 1px solid
+    ${({ theme: { palette }, hasError }) =>
+      hasError ? palette.warning.main : palette.divider.main};
   background: none;
   padding: 0 4px 2px 4px;
   width: 100%;
@@ -60,6 +59,21 @@ const Input = styled.input<TextInputStyleProps>`
     outline: none;
   }
 `;
+const Tip = styled.div<TextInputStyleProps>`
+  position: absolute;
+  bottom: -1.3rem;
+  left: ${({ theme }) => theme.spacing.xs};
+  font-size: 0.7rem;
+  z-index: 2;
+  transition: opacity 0.5s;
+  opacity: 0;
+  ${({ isFocused, hasError }) =>
+    isFocused &&
+    hasError &&
+    `
+    opacity: 1;
+  `}
+`;
 
 interface Props {
   type: 'text' | 'password';
@@ -68,6 +82,7 @@ interface Props {
   onChange: (value: string) => void;
   isDisabled?: boolean;
   hasError?: boolean;
+  errorTip?: string;
 }
 
 export default function TextInput({
@@ -77,6 +92,7 @@ export default function TextInput({
   onChange,
   isDisabled,
   hasError,
+  errorTip,
 }: Props) {
   const [isFocused, setIsFocused] = useState(false);
 
@@ -104,6 +120,15 @@ export default function TextInput({
         hasValue={Boolean(value)}
         hasError={hasError ?? false}
       />
+      {errorTip && (
+        <Tip
+          isFocused={isFocused}
+          hasValue={Boolean(value)}
+          hasError={hasError ?? false}
+        >
+          {errorTip}
+        </Tip>
+      )}
     </Fieldset>
   );
 }
