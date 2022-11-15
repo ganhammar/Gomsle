@@ -6,6 +6,7 @@ type colors = 'primary' | 'secondary' | 'warning' | 'success' | 'divider';
 interface ElementProps {
   color: colors;
   isDisabled: boolean;
+  isLoading: boolean;
 }
 
 const Element = styled.button<ElementProps>`
@@ -26,6 +27,13 @@ const Element = styled.button<ElementProps>`
     box-shadow: ${({ theme }) => theme.shadows[0]};
     opacity: 0.9;
   }
+  ${({ isLoading }) => isLoading && `
+    opacity: 0;
+    cursor: auto;
+    &:hover {
+      opacity: 0;
+    }
+  `}
 `;
 
 interface Props {
@@ -33,6 +41,7 @@ interface Props {
   color: colors;
   className?: string;
   isDisabled?: boolean;
+  isLoading?: boolean;
   onClick: () => void;
 }
 
@@ -41,12 +50,13 @@ export default function Button({
   className,
   color,
   isDisabled,
+  isLoading,
   onClick,
 }: Props) {
   const submit = (event: React.MouseEvent<HTMLButtonElement>) => {
     event.preventDefault();
 
-    if (isDisabled === false) {
+    if (isDisabled === false && isLoading === false) {
       onClick();
     }
   };
@@ -57,6 +67,7 @@ export default function Button({
       color={color}
       className={className}
       onClick={submit}
+      isLoading={isLoading ?? false}
     >
       {children}
     </Element>

@@ -3,6 +3,7 @@ import styled from 'styled-components';
 import Button from '../../components/Button';
 import TextInput from '../../components/TextInput';
 import isEmail from '../../utils/isEmail';
+import { UserService } from './UserService';
 
 const MIN_PASSWORD_LENGTH = 8;
 
@@ -16,10 +17,20 @@ const Submit = styled(Button)`
 `;
 
 export function Register() {
+  const [isLoading, setIsLoading] = useState(false);
   const [email, setEmail] = useState<string>('');
   const [password, setPassword] = useState<string>('');
 
-  const submit = () => {};
+  const userService = new UserService();
+  const submit = async () => {
+    setIsLoading(true);
+    const response = await userService.register({
+      email,
+      password,
+    });
+    console.log(response);
+    setIsLoading(false);
+  };
 
   return (
     <Form>
@@ -43,6 +54,7 @@ export function Register() {
         color="success"
         onClick={submit}
         isDisabled={!isEmail(email) || password.length < MIN_PASSWORD_LENGTH}
+        isLoading={isLoading}
       >
         Register
       </Submit>
