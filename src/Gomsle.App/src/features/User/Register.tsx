@@ -3,6 +3,7 @@ import styled from 'styled-components';
 import Button from '../../components/Button';
 import TextInput from '../../components/TextInput';
 import isEmail from '../../utils/isEmail';
+import useAsyncError from '../../utils/useAsyncError';
 import { UserService } from './UserService';
 
 const MIN_PASSWORD_LENGTH = 8;
@@ -17,19 +18,26 @@ const Submit = styled(Button)`
 `;
 
 export function Register() {
+  const throwError = useAsyncError();
   const [isLoading, setIsLoading] = useState(false);
   const [email, setEmail] = useState<string>('');
   const [password, setPassword] = useState<string>('');
 
   const userService = new UserService();
   const submit = async () => {
-    setIsLoading(true);
-    const response = await userService.register({
-      email,
-      password,
-    });
-    console.log(response);
-    setIsLoading(false);
+    try {
+      setIsLoading(true);
+
+      const response = await userService.register({
+        email,
+        password,
+      });
+
+      console.log(response);
+      setIsLoading(false);
+    } catch (error) {
+      throwError(error);
+    }
   };
 
   return (
@@ -55,6 +63,7 @@ export function Register() {
         onClick={submit}
         isDisabled={!isEmail(email) || password.length < MIN_PASSWORD_LENGTH}
         isLoading={isLoading}
+        isAsync
       >
         Register
       </Submit>

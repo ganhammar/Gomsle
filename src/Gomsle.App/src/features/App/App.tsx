@@ -4,6 +4,7 @@ import { ThemeProvider } from 'styled-components';
 import { AppRoutes } from './AppRoutes';
 import { appTheme } from './appTheme';
 import { Layout } from './Layout';
+import ErrorBoundry from './ErrorBoundry';
 
 export function App() {
   return (
@@ -11,7 +12,9 @@ export function App() {
       <BrowserRouter>
         <ThemeProvider theme={appTheme}>
           <Layout>
-            <AppRoutes />
+            <ErrorBoundry>
+              <AppRoutes />
+            </ErrorBoundry>
           </Layout>
         </ThemeProvider>
       </BrowserRouter>
