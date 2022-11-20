@@ -4,6 +4,19 @@ interface Request {
   body?: object;
 }
 
+export interface ApiError {
+  errorCode: string;
+  errorMessage: string;
+  attemptedValue?: string | null;
+  propertyName?: string;
+}
+
+export interface ApiResponse<TResult> {
+  errors?: ApiError[];
+  success: boolean;
+  result?: TResult;
+}
+
 export abstract class FetchBase {
   protected async get<T>(url: string) {
     return await this.request<T>({ method: 'get', url });
@@ -30,13 +43,31 @@ export abstract class FetchBase {
       options.body = JSON.stringify(body);
     }
 
-    const response = await fetch(url, options);
+    const result = await fetch(url, options);
 
-    if (!response.ok) {
-      const error = await response.text();
-      throw new Error(error);
+    if (!result.ok) {
+      let message = await result.text();
+      const response: ApiResponse<T> = {
+        success: false,
+      };
+
+      try {
+        response.errors = JSON.parse(message);
+      } catch(_) {
+        response.errors = [{
+          errorCode: 'UnexpectedResponse',
+          errorMessage: message,
+        }];
+      }
+      
+      return response;
     }
 
-    return (await response.json()) as T;
+    const data = await result.json();
+    const response: ApiResponse<T> = {
+      success: true,
+      result: data,
+    };
+    return response;
   }
 }

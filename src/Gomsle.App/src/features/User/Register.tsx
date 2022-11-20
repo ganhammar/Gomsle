@@ -7,6 +7,7 @@ import useAsyncError from '../../utils/useAsyncError';
 import { UserService } from './UserService';
 
 const MIN_PASSWORD_LENGTH = 8;
+const RETURN_URL = '/dashboard';
 
 const Form = styled.form`
   display: flex;
@@ -31,6 +32,7 @@ export function Register() {
       const response = await userService.register({
         email,
         password,
+        returnUrl: RETURN_URL,
       });
 
       console.log(response);

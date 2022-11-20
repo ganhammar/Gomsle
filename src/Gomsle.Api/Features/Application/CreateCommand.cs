@@ -35,16 +35,13 @@ public class CreateCommand
     public class CommandHandler : Handler<Command, IResponse<ApplicationDto>>
     {
         private readonly DynamoDBContext _dbContext;
-        private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly IOpenIddictApplicationManager _applicationManager;
 
         public CommandHandler(
             IAmazonDynamoDB database,
-            IHttpContextAccessor httpContextAccessor,
             IOpenIddictApplicationManager applicationManager)
         {
             _dbContext = new DynamoDBContext(database);
-            _httpContextAccessor = httpContextAccessor;
             _applicationManager = applicationManager;
         }
 

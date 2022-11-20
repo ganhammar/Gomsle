@@ -32,6 +32,10 @@ public class Startup
         Configuration.GetSection(nameof(EmailSenderOptions)).Bind(emailSenderOptions);
         services.AddSingleton<EmailSenderOptions>(emailSenderOptions);
 
+        InternalOptions internalOptions = new();
+        Configuration.GetSection(nameof(InternalOptions)).Bind(internalOptions);
+        services.AddSingleton<InternalOptions>(internalOptions);
+
         var dynamoDbConfig = Configuration.GetSection("DynamoDB");
 
         services

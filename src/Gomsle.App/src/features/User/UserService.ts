@@ -3,6 +3,7 @@ import { FetchBase } from '../../infrastructure/FetchBase';
 export interface RegisterParamters {
   email: string;
   password: string;
+  returnUrl: string;
 }
 
 export class UserService extends FetchBase {

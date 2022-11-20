@@ -1,6 +1,5 @@
 using Amazon.DynamoDBv2;
 using Amazon.DynamoDBv2.DataModel;
-using Amazon.DynamoDBv2.DocumentModel;
 using FluentValidation;
 using Gomsle.Api.Infrastructure;
 using Gomsle.Api.Infrastructure.Extensions;
@@ -27,22 +26,9 @@ public class CreateCommand
                 .MustAsync(async (name, cancellationToken) =>
                 {
                     var context = new DynamoDBContext(database);
-                    var search = context.FromQueryAsync<AccountModel>(new QueryOperationConfig
-                    {
-                        IndexName = "NormalizedName-index",
-                        KeyExpression = new Expression
-                        {
-                            ExpressionStatement = "NormalizedName = :normalizedName",
-                            ExpressionAttributeValues = new Dictionary<string, DynamoDBEntry>
-                            {
-                                { ":normalizedName", name!.UrlFriendly() },
-                            }
-                        },
-                        Limit = 1,
-                    });
-                    var accounts = await search.GetRemainingAsync(cancellationToken);
+                    var account = await AccountHelpers.FindByName(name!, context, cancellationToken);
 
-                    return accounts.Any() == false;
+                    return account != default;
                 })
                 .WithErrorCode("NameNotUnique")
                 .WithMessage("The name is already taken");

@@ -16,12 +16,12 @@ public class UserController : ApiControllerBase
 
     [HttpPost]
     [AllowAnonymous]
-    public async Task<IActionResult> Register(RegisterCommand.Command command)
+    public async Task<IActionResult> Register([FromBody] RegisterCommand.Command command)
         => Respond(await _mediator.Send(command));
 
     [HttpGet]
     [AllowAnonymous]
-    public async Task<IActionResult> ConfirmEmail(ConfirmEmailCommand.Command command)
+    public async Task<IActionResult> ConfirmEmail([FromQuery] ConfirmEmailCommand.Command command)
     {
         var result = await _mediator.Send(command);
 
@@ -34,12 +34,12 @@ public class UserController : ApiControllerBase
 
     [HttpPost]
     [AllowAnonymous]
-    public async Task<IActionResult> Forgot(ForgotPasswordCommand.Command command)
+    public async Task<IActionResult> Forgot([FromBody] ForgotPasswordCommand.Command command)
         => Respond(await _mediator.Send(command));
 
     [HttpGet]
     [AllowAnonymous]
-    public async Task<IActionResult> Reset(ResetPasswordCommand.Command command)
+    public async Task<IActionResult> Reset([FromQuery] ResetPasswordCommand.Command command)
     {
         var result = await _mediator.Send(command);
 
@@ -52,7 +52,7 @@ public class UserController : ApiControllerBase
 
     [HttpPost]
     [AllowAnonymous]
-    public async Task<IActionResult> Login(LoginCommand.Command command)
+    public async Task<IActionResult> Login([FromBody] LoginCommand.Command command)
         => Respond(await _mediator.Send(command));
     
     [HttpGet]
@@ -62,11 +62,11 @@ public class UserController : ApiControllerBase
 
     [HttpPost]
     [AllowAnonymous]
-    public async Task<IActionResult> SendCodeCommand(SendCodeCommand.Command command)
+    public async Task<IActionResult> SendCodeCommand([FromBody] SendCodeCommand.Command command)
         => Respond(await _mediator.Send(command));
 
     [HttpPost]
     [AllowAnonymous]
-    public async Task<IActionResult> VerifyCodeCommand(VerifyCodeCommand.Command command)
+    public async Task<IActionResult> VerifyCodeCommand([FromBody] VerifyCodeCommand.Command command)
         => Respond(await _mediator.Send(command));
 }
