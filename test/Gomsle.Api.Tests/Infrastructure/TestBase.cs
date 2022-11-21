@@ -3,6 +3,7 @@ using Amazon.DynamoDBv2;
 using Amazon.DynamoDBv2.DataModel;
 using AspNetCore.Identity.AmazonDynamoDB;
 using Gomsle.Api.Features.Account;
+using Gomsle.Api.Features.Application;
 using Gomsle.Api.Features.Email;
 using Gomsle.Api.Features.User;
 using Gomsle.Api.Infrastructure;
@@ -68,6 +69,7 @@ public abstract class TestBase
         serviceCollection.AddIdentity();
         serviceCollection.AddMediatR();
         serviceCollection.AddSingleton<SignInManager<DynamoDbUser>, MockSignInManager>();
+        serviceCollection.AddSingleton<InternalOptions>(new InternalOptions());
         serviceCollection.Configure<IdentityOptions>(options =>
         {
             options.ClaimsIdentity.UserIdClaimType = Claims.Subject;

@@ -28,7 +28,7 @@ public class CreateCommand
                     var context = new DynamoDBContext(database);
                     var account = await AccountHelpers.FindByName(name!, context, cancellationToken);
 
-                    return account != default;
+                    return account == default;
                 })
                 .WithErrorCode("NameNotUnique")
                 .WithMessage("The name is already taken");
