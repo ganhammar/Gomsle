@@ -1,3 +1,4 @@
+using System.Web;
 using AspNetCore.Identity.AmazonDynamoDB;
 using FluentValidation;
 using Gomsle.Api.Features.Email;
@@ -61,8 +62,9 @@ public class ForgotPasswordCommand
         {
             var token = await _userManager.GeneratePasswordResetTokenAsync(user);
             var request = _httpContextAccessor.HttpContext!.Request;
-            var url = $"{request.Protocol}://{request.Host}/user/reset"
-                + $"?UserId={user.Id}&Token={token}&ReturnUrl={returnUrl}";
+            var url = $"{request.Scheme}://{request.Host}/user/reset"
+                + $"?UserId={user.Id}&Token={HttpUtility.UrlEncode(token)}"
+                + $"&ReturnUrl={HttpUtility.UrlEncode(returnUrl)}";
 
             var body = $"Follow the link below to reset your Gömsle account password:<br /><a href=\"{url}\">{url}</a>";
 

@@ -1,3 +1,4 @@
+using System.Web;
 using Amazon.DynamoDBv2;
 using Amazon.DynamoDBv2.DataModel;
 using AspNetCore.Identity.AmazonDynamoDB;
@@ -102,7 +103,7 @@ public class InviteCommand
             if (user != default)
             {
                 var request = _httpContextAccessor.HttpContext!.Request;
-                return $"{request.Scheme}://{request.Host}/account/acceptinvitation?token={token}";
+                return $"{request.Scheme}://{request.Host}/account/acceptinvitation?token={HttpUtility.UrlEncode(token)}";
             }
 
             return $"{invitationUrl}?token={token}";

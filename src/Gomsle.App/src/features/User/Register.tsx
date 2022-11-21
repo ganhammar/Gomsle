@@ -32,7 +32,7 @@ export function Register() {
       const response = await userService.register({
         email,
         password,
-        returnUrl: RETURN_URL,
+        returnUrl: `${window.location.origin}${RETURN_URL}`,
       });
 
       console.log(response);
