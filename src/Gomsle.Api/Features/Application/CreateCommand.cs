@@ -1,3 +1,4 @@
+using System.Text.Json.Serialization;
 using Amazon.DynamoDBv2;
 using Amazon.DynamoDBv2.DataModel;
 using FluentValidation;
@@ -15,6 +16,8 @@ public class CreateCommand
     public class Command : ApplicationBaseInput, IRequest<IResponse<ApplicationDto>>
     {
         public string? AccountId { get; set; }
+        [JsonIgnore]
+        public string ClientId { get; set; } = Guid.NewGuid().ToString();
     }
 
     public class CommandValidator : AbstractValidator<Command>
@@ -51,13 +54,18 @@ public class CreateCommand
             var applicationDescriptor = new OpenIddictApplicationDescriptor
             {
                 DisplayName = request.DisplayName,
-                ClientId = Guid.NewGuid().ToString(),
+                ClientId = request.ClientId,
                 Permissions =
                 {
                     "ept:authorization",
                     "ept:logout",
+                    "gt:authorization_code",
                     "gt:implicit",
                     "gt:refresh_token",
+                    "rst:code",
+                    "rst:code id_token",
+                    "rst:code id_token token",
+                    "rst:code token",
                     "rst:id_token",
                     "rst:token",
                     "scp:email",
