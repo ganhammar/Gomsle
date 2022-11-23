@@ -60,7 +60,7 @@ public class Startup
             {
                 builder
                     .SetAuthorizationEndpointUris("/connect/authorize")
-                    .SetLogoutEndpointUris("/connect/LogoutCommand")
+                    .SetLogoutEndpointUris("/connect/logout")
                     .SetIntrospectionEndpointUris("/connect/introspect")
                     .SetUserinfoEndpointUris("/connect/userinfo")
                     .SetTokenEndpointUris("/connect/token");
@@ -105,6 +105,11 @@ public class Startup
             });
 
         services
+            .ConfigureApplicationCookie(options =>
+            {
+                options.LoginPath = "/login";
+                options.LogoutPath = "/logout";
+            })
             .Configure<CookiePolicyOptions>(options =>
             {
                 options.Secure = CookieSecurePolicy.Always;
@@ -164,6 +169,7 @@ public class Startup
 
         app.UseCors();
         app.UseCookiePolicy();
+        app.UseStaticFiles();
         app.UseRouting();
         app.UseAuthentication();
         app.UseAuthorization();
@@ -172,6 +178,7 @@ public class Startup
             options.MapControllers();
             options.MapDefaultControllerRoute();
             options.MapHealthChecks("/health");
+            options.MapFallbackToFile("index.html");
         });
     }
 }
