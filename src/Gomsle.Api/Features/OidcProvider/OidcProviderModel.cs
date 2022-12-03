@@ -17,5 +17,6 @@ public class OidcProviderModel
     public bool IsDefault { get; set; }
     public bool IsVisible { get; set; }
     public List<string> Scopes { get; set; } = new();
+    [DynamoDBIgnore]
     public List<string> RequiredDomains { get; set; } = new();
 }

@@ -167,6 +167,7 @@ public class Startup
             app.UseStatusCodePagesWithReExecute("/error");
         }
 
+        app.UseMiddleware<ApplicationMiddleware>();
         app.UseCors();
         app.UseCookiePolicy();
         app.UseStaticFiles();

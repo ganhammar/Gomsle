@@ -138,6 +138,11 @@ export default function Button({
 
   const submit = (event: React.MouseEvent<HTMLButtonElement>) => {
     event.preventDefault();
+
+    if (isDisabled || isLoading) {
+      return;
+    }
+
     setHasClicked(true);
 
     if (isAsync) {
@@ -147,9 +152,7 @@ export default function Button({
       }, MINIMUM_LOADING_INDICATION);
     }
 
-    if (isDisabled === false && isLoading === false) {
-      onClick();
-    }
+    onClick();
   };
 
   useEffect(() => {

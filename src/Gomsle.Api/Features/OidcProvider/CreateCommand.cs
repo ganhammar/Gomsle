@@ -63,5 +63,34 @@ public class CreateCommand
 
             return Response(model);
         }
+
+        private async Task<List<OidcProviderRequiredDomainModel>> SaveOrigins(
+            Command request, string oidcProviderId, CancellationToken cancellationToken)
+        {
+            var result = new List<OidcProviderRequiredDomainModel>();
+            var domains = request.RequiredDomains;
+
+            if (domains.Any() == false)
+            {
+                return result;
+            }
+
+            var batch = _dbContext.CreateBatchWrite<OidcProviderRequiredDomainModel>();
+
+            foreach (var domain in domains)
+            {
+                var model = new OidcProviderRequiredDomainModel
+                {
+                    OidcProviderId = oidcProviderId,
+                    RequiredDomain = domain,
+                };
+                batch.AddPutItem(model);
+                result.Add(model);
+            }
+
+            await batch.ExecuteAsync(cancellationToken);
+
+            return result;
+        }
     }
 }

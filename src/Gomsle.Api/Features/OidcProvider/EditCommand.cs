@@ -1,5 +1,6 @@
 using Amazon.DynamoDBv2;
 using Amazon.DynamoDBv2.DataModel;
+using Amazon.DynamoDBv2.DocumentModel;
 using FluentValidation;
 using Gomsle.Api.Features.Account;
 using Gomsle.Api.Infrastructure;
@@ -75,9 +76,81 @@ public class EditCommand
                 oidcProvider.ClientSecret = request.ClientSecret;
             }
 
-            await _dbContext.SaveAsync(oidcProvider);
+            await _dbContext.SaveAsync(oidcProvider, cancellationToken);
+            await SaveDomains(request, cancellationToken);
 
             return Response(oidcProvider);
+        }
+
+        private async Task<List<OidcProviderRequiredDomainModel>> GetDomains(
+            string oidcProviderId, CancellationToken cancellationToken)
+        {
+            var search = _dbContext.FromQueryAsync<OidcProviderRequiredDomainModel>(new QueryOperationConfig
+            {
+                IndexName = "OidcProviderId-index",
+                KeyExpression = new Expression
+                {
+                    ExpressionStatement = "OidcProviderId = :oidcProviderId",
+                    ExpressionAttributeValues = new Dictionary<string, DynamoDBEntry>
+                {
+                    { ":oidcProviderId", oidcProviderId },
+                },
+                },
+            });
+            return await search.GetRemainingAsync(cancellationToken);
+        }
+
+        private async Task RemoveDeletedDomains(
+            List<OidcProviderRequiredDomainModel> origins,
+            string oidcProviderId,
+            CancellationToken cancellationToken)
+        {
+            var persistedOrigins = await GetDomains(oidcProviderId, cancellationToken);
+
+            var toBeDeleted = persistedOrigins.Except(origins);
+
+            if (toBeDeleted.Any())
+            {
+                var batch = _dbContext.CreateBatchWrite<OidcProviderRequiredDomainModel>();
+
+                foreach (var login in toBeDeleted)
+                {
+                    batch.AddDeleteItem(login);
+                }
+
+                await batch.ExecuteAsync();
+            }
+        }
+
+        private async Task<List<OidcProviderRequiredDomainModel>> SaveDomains(
+            Command request, CancellationToken cancellationToken)
+        {
+            var domains = request.RequiredDomains;
+            var domainModels = domains
+                .Select(x => new OidcProviderRequiredDomainModel
+                {
+                    OidcProviderId = request.Id!,
+                    RequiredDomain = x,
+                })
+                .ToList();
+
+            await RemoveDeletedDomains(domainModels, request.Id!, cancellationToken);
+
+            if (domainModels.Any() == false)
+            {
+                return domainModels;
+            }
+
+            var batch = _dbContext.CreateBatchWrite<OidcProviderRequiredDomainModel>();
+
+            foreach (var model in domainModels)
+            {
+                batch.AddPutItem(model);
+            }
+
+            await batch.ExecuteAsync(cancellationToken);
+
+            return domainModels;
         }
     }
 }

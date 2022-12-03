@@ -3,6 +3,7 @@ import { Route, Routes } from 'react-router-dom';
 import { useRecoilState } from 'recoil';
 import { Loader } from '../../components/Loader';
 import { userAtom } from '../User';
+import { Login } from './';
 
 interface AuthProps {
   children: ReactElement;
@@ -16,10 +17,6 @@ function RenderIfLoggedIn({ children }: AuthProps) {
   }
 
   return <Loader />;
-}
-
-function Login() {
-  return <>Login</>;
 }
 
 function Logout() {

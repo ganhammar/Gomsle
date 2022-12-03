@@ -26,4 +26,9 @@ public class ApplicationController : ApiControllerBase
     [HttpDelete]
     public async Task<IActionResult> Delete(DeleteCommand.Command command)
         => Respond(await _mediator.Send(command));
+
+    [HttpGet]
+    [AllowAnonymous]
+    public async Task<IActionResult> DomainRequirements([FromQuery] DomainRequirements.Query query)
+        => Respond(await _mediator.Send(query));
 }

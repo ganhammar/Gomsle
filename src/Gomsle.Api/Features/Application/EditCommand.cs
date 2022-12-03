@@ -89,7 +89,7 @@ public class EditCommand
             return Response(ApplicationDtoMapper.ToDto(application, applicationConfiguration, origins));
         }
 
-        public async Task<List<ApplicationOriginModel>> GetOrigins(
+        private async Task<List<ApplicationOriginModel>> GetOrigins(
             string applicationId, CancellationToken cancellationToken)
         {
             var search = _dbContext.FromQueryAsync<ApplicationOriginModel>(new QueryOperationConfig
@@ -107,7 +107,7 @@ public class EditCommand
             return await search.GetRemainingAsync(cancellationToken);
         }
 
-        public async Task RemoveDeletedLogins(
+        private async Task RemoveDeletedOrigins(
             List<ApplicationOriginModel> origins,
             string applicationId,
             CancellationToken cancellationToken)
@@ -129,7 +129,7 @@ public class EditCommand
             }
         }
 
-        public async Task<List<ApplicationOriginModel>> SaveOrigins(
+        private async Task<List<ApplicationOriginModel>> SaveOrigins(
             Command request, CancellationToken cancellationToken)
         {
             var origins = request.Origins;
@@ -147,7 +147,7 @@ public class EditCommand
                 })
                 .ToList();
 
-            await RemoveDeletedLogins(originModels, request.Id!, cancellationToken);
+            await RemoveDeletedOrigins(originModels, request.Id!, cancellationToken);
 
             if (originModels.Any() == false)
             {
